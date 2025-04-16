@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { register } from '@/lib/actions';
 import { Label } from '@/components/ui/label';
 import { useFormStatus } from 'react-dom';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 function SubmitButton() {
@@ -31,11 +31,13 @@ function SubmitButton() {
 }
 
 export default function RegisterPage() {
-	const { toast } = useToast();
-
 	async function onSubmit(formData: FormData) {
 		const res = await register(formData);
-		toast(res);
+		if (res.error) {
+			toast.error(res.description);
+		} else {
+			toast.success(res.description);
+		}
 	}
 
 	return (

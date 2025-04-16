@@ -6,7 +6,7 @@ import { signUpSchema } from './zod';
 import { addCustomer } from '@/db/query/customer';
 import bcrypt from 'bcrypt';
 
-type Props = { variant?: 'destructive'; description: string };
+type Props = { error?: boolean; description: string };
 
 export async function login(formData: FormData): Promise<Props> {
 	await new Promise(resolve => setTimeout(resolve, 1000));
@@ -20,9 +20,9 @@ export async function login(formData: FormData): Promise<Props> {
 		if (error instanceof AuthError) {
 			switch (error.type) {
 				case 'CredentialsSignin':
-					return { variant: 'destructive', description: error.message };
+					return { error: true, description: error.message };
 				default:
-					return { variant: 'destructive', description: 'Ismeretlen hiba történt.' };
+					return { error: true, description: 'Ismeretlen hiba történt.' };
 			}
 		}
 		throw error;
@@ -42,7 +42,7 @@ export async function register(formData: FormData): Promise<Props> {
 
 	const parse = await signUpSchema.safeParseAsync(credentials);
 	if (!parse.success) {
-		return { variant: 'destructive', description: parse.error.errors[0].message };
+		return { error: true, description: parse.error.errors[0].message };
 	}
 
 	const salt = await bcrypt.genSalt(10);
@@ -51,7 +51,21 @@ export async function register(formData: FormData): Promise<Props> {
 
 	console.log(parse.data);
 
-	const id = await addCustomer(parse.data);
+	try {
+		const id = await addCustomer(parse.data);
+	} catch (error) {
+		if (
+			error instanceof Error &&
+			typeof error === 'object' &&
+			'constraint' in error &&
+			(error as any).constraint === 'customers_email_unique'
+		) {
+			return { error: true, description: 'Ez az email cím már foglalt!' };
+		}
 
-	return { description: `Sikeres regisztráció! ID: ${id}` };
+		console.error(error);
+		return { error: true, description: 'Ismeretlen hiba történt.' };
+	}
+
+	return { description: `Sikeres regisztráció!` };
 }
