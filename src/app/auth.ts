@@ -2,7 +2,7 @@ import { getCustomerByEmail } from '@/db/query/customer';
 import NextAuth, { CredentialsSignin } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { signInSchema } from '@/lib/zod';
-import bcrypt from 'bcrypt';
+import { comparePassword } from '@/lib/password';
 
 class LogInError extends CredentialsSignin {
 	constructor(code: string) {
@@ -28,7 +28,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				const customer = await getCustomerByEmail(email);
 				if (!customer) throw new LogInError('Nem létezik felhasználó ilyen email-el.');
 
-				const passwordsMatch = await bcrypt.compare(password, customer.password);
+				const passwordsMatch = comparePassword(password, customer.password);
 				if (!passwordsMatch) throw new LogInError('A megadott jelszó hibás.');
 
 				return customer;

@@ -4,7 +4,7 @@ import { signIn } from '@/app/auth';
 import { AuthError } from 'next-auth';
 import { signUpSchema } from './zod';
 import { addCustomer } from '@/db/query/customer';
-import bcrypt from 'bcrypt';
+import { hashPassword } from '@/lib/password';
 
 type Props = { error?: boolean; description: string };
 
@@ -45,11 +45,7 @@ export async function register(formData: FormData): Promise<Props> {
 		return { error: true, description: parse.error.errors[0].message };
 	}
 
-	const salt = await bcrypt.genSalt(10);
-	const hashedPassword = await bcrypt.hash(parse.data.password, salt);
-	parse.data.password = hashedPassword;
-
-	console.log(parse.data);
+	parse.data.password = hashPassword(parse.data.password);
 
 	try {
 		const id = await addCustomer(parse.data);
