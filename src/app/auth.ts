@@ -26,7 +26,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 				const { email, password } = parse.data;
 				const customer = await getCustomerByEmail(email);
-				if (!customer) throw new LogInError('Nem létezik felhasználó ilyen email-el.');
+				if (!customer) throw new LogInError('Nem létezik felhasználó ilyen email címmel.');
 
 				const passwordsMatch = comparePassword(password, customer.password);
 				if (!passwordsMatch) throw new LogInError('A megadott jelszó hibás.');

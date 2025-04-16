@@ -1,6 +1,7 @@
 'use client';
 
 import Form from 'next/form';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -86,6 +87,9 @@ export default function RegisterPage() {
 					</CardContent>
 					<CardFooter className="grid">
 						<SubmitButton />
+						<Button asChild className="mt-3" variant="outline">
+							<Link href="/login">Vissza a bejelentkezésre</Link>
+						</Button>
 					</CardFooter>
 				</Card>
 			</Form>
