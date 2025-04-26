@@ -8,14 +8,13 @@ import { hashPassword } from '@/lib/password';
 
 type Props = { error?: boolean; description: string };
 
-export async function login(formData: FormData): Promise<Props> {
+export async function login(formData: FormData): Promise<Props | void> {
 	await new Promise(resolve => setTimeout(resolve, 1000));
 
 	formData.append('redirectTo', '/dashboard');
 
 	try {
 		await signIn('credentials', formData);
-		return { description: 'Sikeresen bejelentkeztél.' };
 	} catch (error) {
 		if (error instanceof AuthError) {
 			switch (error.type) {

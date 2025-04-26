@@ -34,10 +34,8 @@ function SubmitButton() {
 export default function LoginPage() {
 	async function onSubmit(formData: FormData) {
 		const res = await login(formData);
-		if (res.error) {
+		if (res?.error) {
 			toast.error(res.description);
-		} else {
-			toast.success(res.description);
 		}
 	}
 

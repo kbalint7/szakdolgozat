@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { auth } from '@/app/auth';
 import NextAuth from 'next-auth';
 
 import type { NextAuthConfig } from 'next-auth';
