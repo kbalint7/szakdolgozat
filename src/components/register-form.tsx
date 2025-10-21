@@ -34,7 +34,8 @@ export function RegisterForm() {
 
         const { data, error } = await authClient.signUp.email({ email, password, name });
         if (error) {
-            toast.error(error.message);
+            if (error.message) toast.error(error.message);
+            else toast.error(error.statusText);
             return;
         }
 

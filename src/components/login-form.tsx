@@ -30,7 +30,8 @@ export function LoginForm() {
 
         const { data, error } = await authClient.signIn.email({ email, password, callbackURL: '/dashboard' });
         if (error) {
-            toast.error(error.message);
+            if (error.message) toast.error(error.message);
+            else toast.error(error.statusText);
         }
     }
 
