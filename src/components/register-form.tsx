@@ -11,8 +11,11 @@ import { toast } from 'sonner';
 import { SubmitButton } from '@/components/submit-button';
 import { authClient } from '@/lib/auth-client';
 import { signUpSchema } from '@/lib/zod';
+import { useRouter } from 'next/navigation';
 
 export function RegisterForm() {
+    const router = useRouter();
+
     async function onSubmit(formData: FormData) {
         const credentials = {
             firstName: formData.get('firstName'),
@@ -40,6 +43,8 @@ export function RegisterForm() {
         }
 
         toast.success('Sikeres regisztráció!');
+        router.push('/dashboard');
+        router.refresh();
     }
 
     return (
