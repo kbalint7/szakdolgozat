@@ -12,9 +12,17 @@ import { SubmitButton } from '@/components/submit-button';
 import { authClient } from '@/lib/auth-client';
 import { signUpSchema } from '@/lib/zod';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export function RegisterForm() {
   const router = useRouter();
+  const { data: session } = authClient.useSession();
+
+  useEffect(() => {
+    if (session) {
+      router.replace('/dashboard');
+    }
+  }, [session, router]);
 
   async function onSubmit(formData: FormData) {
     const credentials = {
@@ -35,7 +43,7 @@ export function RegisterForm() {
     const password = parse.data.password;
     const name = parse.data.firstName + ' ' + parse.data.lastName;
 
-    const { data, error } = await authClient.signUp.email({ email, password, name });
+    const { error } = await authClient.signUp.email({ email, password, name });
     if (error) {
       if (error.message) toast.error(error.message);
       else toast.error(error.statusText);

@@ -11,8 +11,19 @@ import { toast } from 'sonner';
 import { SubmitButton } from '@/components/submit-button';
 import { authClient } from '@/lib/auth-client';
 import { signInSchema } from '@/lib/zod';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export function LoginForm() {
+  const router = useRouter();
+  const { data: session } = authClient.useSession();
+
+  useEffect(() => {
+    if (session) {
+      router.replace('/dashboard');
+    }
+  }, [session, router]);
+
   async function onSubmit(formData: FormData) {
     const credentials = {
       email: formData.get('email'),
@@ -28,7 +39,7 @@ export function LoginForm() {
     const email = parse.data.email;
     const password = parse.data.password;
 
-    const { data, error } = await authClient.signIn.email({ email, password, callbackURL: '/dashboard' });
+    const { error } = await authClient.signIn.email({ email, password, callbackURL: '/dashboard' });
     if (error) {
       if (error.message) toast.error(error.message);
       else toast.error(error.statusText);
