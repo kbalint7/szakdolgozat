@@ -10,7 +10,7 @@ export function SubmitButton({ text }: { text: string }) {
   if (pending) {
     return (
       <Button disabled>
-        <Spinner className="animate-spin" />
+        <Spinner />
         {text}
       </Button>
     );
