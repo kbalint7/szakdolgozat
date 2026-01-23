@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Lincenszkezelő',
+  title: 'Licenszkezelő',
   description: 'A licenszek kezelése egyszerűen és hatékonyan.',
 };
 
