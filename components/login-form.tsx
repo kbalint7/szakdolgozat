@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { SubmitButton } from '@/components/submit-button';
 import { authClient } from '@/lib/auth-client';
-import { signInSchema } from '@/lib/zod';
+import { loginAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -25,25 +25,15 @@ export function LoginForm() {
   }, [session, router]);
 
   async function onSubmit(formData: FormData) {
-    const credentials = {
-      email: formData.get('email'),
-      password: formData.get('password'),
-    };
+    const result = await loginAction(formData);
 
-    const parse = await signInSchema.safeParseAsync(credentials);
-    if (!parse.success) {
-      toast.error(parse.error.issues[0].message);
+    if (!result.success) {
+      toast.error(result.error ?? 'Hiba történt a bejelentkezés során.');
       return;
     }
 
-    const email = parse.data.email;
-    const password = parse.data.password;
-
-    const { error } = await authClient.signIn.email({ email, password, callbackURL: '/dashboard' });
-    if (error) {
-      if (error.message) toast.error(error.message);
-      else toast.error(error.statusText);
-    }
+    router.replace('/dashboard');
+    router.refresh();
   }
 
   return (

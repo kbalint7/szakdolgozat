@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { SubmitButton } from '@/components/submit-button';
 import { authClient } from '@/lib/auth-client';
-import { signUpSchema } from '@/lib/zod';
+import { registerAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -25,28 +25,10 @@ export function RegisterForm() {
   }, [session, router]);
 
   async function onSubmit(formData: FormData) {
-    const credentials = {
-      firstName: formData.get('firstName'),
-      lastName: formData.get('lastName'),
-      email: formData.get('email'),
-      password: formData.get('password'),
-      age: Number(formData.get('age')),
-    };
+    const result = await registerAction(formData);
 
-    const parse = await signUpSchema.safeParseAsync(credentials);
-    if (!parse.success) {
-      toast.error(parse.error.issues[0].message);
-      return;
-    }
-
-    const email = parse.data.email;
-    const password = parse.data.password;
-    const name = parse.data.firstName + ' ' + parse.data.lastName;
-
-    const { error } = await authClient.signUp.email({ email, password, name });
-    if (error) {
-      if (error.message) toast.error(error.message);
-      else toast.error(error.statusText);
+    if (!result.success) {
+      toast.error(result.error ?? 'Hiba történt a regisztráció során.');
       return;
     }
 

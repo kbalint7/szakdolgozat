@@ -73,7 +73,7 @@ export const verifications = pgTable(
   table => [index('verifications_identifier_idx').on(table.identifier)]
 );
 
-export const products = pgTable('products', {
+/*export const products = pgTable('products', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
   name: text().notNull().unique(),
   price: integer('price').notNull(),
@@ -92,7 +92,7 @@ export const ownerships = pgTable(
     createdAt: timestamp('created_at').notNull().defaultNow(),
   },
   t => [primaryKey({ columns: [t.userId, t.productId] })]
-);
+);*/
 
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
@@ -113,7 +113,7 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
   }),
 }));
 
-export const userRelations = relations(users, ({ many }) => ({
+/*export const userRelations = relations(users, ({ many }) => ({
   ownerships: many(ownerships),
 }));
 
@@ -130,4 +130,4 @@ export const ownershipsRelations = relations(ownerships, ({ one }) => ({
     fields: [ownerships.userId],
     references: [users.id],
   }),
-}));
+}));*/
