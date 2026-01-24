@@ -1,13 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useFormStatus } from 'react-dom';
 import { Spinner } from './ui/spinner';
 
-export function SubmitButton({ text }: { text: string }) {
-  const { pending } = useFormStatus();
-
-  if (pending) {
+export function SubmitButton({ text, loading, ...props }: { text: string; loading: boolean } & React.ComponentProps<typeof Button>) {
+  if (loading) {
     return (
       <Button disabled>
         <Spinner />
@@ -17,7 +14,7 @@ export function SubmitButton({ text }: { text: string }) {
   }
 
   return (
-    <Button className="w-full text-md" type="submit">
+    <Button className="w-full text-md" type="submit" {...props}>
       {text}
     </Button>
   );

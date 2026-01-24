@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@/lib/auth';
-import { signInSchema, signUpSchema } from '@/lib/zod';
+import { SignInData, signInSchema, SignUpData, signUpSchema } from '@/lib/zod';
 import { APIError } from 'better-auth';
 
 type ActionResult = {
@@ -9,13 +9,8 @@ type ActionResult = {
   error?: string;
 };
 
-export async function loginAction(formData: FormData): Promise<ActionResult> {
-  const credentials = {
-    email: formData.get('email'),
-    password: formData.get('password'),
-  };
-
-  const parse = await signInSchema.safeParseAsync(credentials);
+export async function loginAction(data: SignInData): Promise<ActionResult> {
+  const parse = await signInSchema.safeParseAsync(data);
   if (!parse.success) {
     return { success: false };
   }
@@ -40,16 +35,8 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   }
 }
 
-export async function registerAction(formData: FormData): Promise<ActionResult> {
-  const credentials = {
-    firstName: formData.get('firstName'),
-    lastName: formData.get('lastName'),
-    email: formData.get('email'),
-    password: formData.get('password'),
-    age: Number(formData.get('age')),
-  };
-
-  const parse = await signUpSchema.safeParseAsync(credentials);
+export async function registerAction(data: SignUpData): Promise<ActionResult> {
+  const parse = await signUpSchema.safeParseAsync(data);
   if (!parse.success) {
     return { success: false };
   }

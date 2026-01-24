@@ -1,4 +1,4 @@
-import { object, string, number, email } from 'zod';
+import { object, string, number, email, infer as zInfer } from 'zod';
 
 export const signInSchema = object({
   email: email('Érvénytelen email'),
@@ -24,3 +24,6 @@ export const signUpSchema = object({
     .max(32, 'A jelszó legfeljebb 32 karakter hosszú lehet'),
   age: number('Kor megadása kötelező').min(0, 'A kor nem lehet negatív'),
 });
+
+export type SignInData = zInfer<typeof signInSchema>;
+export type SignUpData = zInfer<typeof signUpSchema>;
