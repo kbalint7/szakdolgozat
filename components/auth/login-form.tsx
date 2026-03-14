@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { SubmitButton } from '@/components/submit-button';
+import { SubmitButton } from '@/components/auth/submit-button';
 import { authClient } from '@/lib/auth-client';
 import { loginAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';

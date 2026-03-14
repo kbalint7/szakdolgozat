@@ -73,27 +73,6 @@ export const verifications = pgTable(
   table => [index('verifications_identifier_idx').on(table.identifier)],
 );
 
-/*export const products = pgTable('products', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  name: text().notNull().unique(),
-  price: integer('price').notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
-
-export const ownerships = pgTable(
-  'ownerships',
-  {
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id),
-    productId: integer('product_id')
-      .notNull()
-      .references(() => products.id),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-  },
-  t => [primaryKey({ columns: [t.userId, t.productId] })]
-);*/
-
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   accounts: many(accounts),
@@ -112,22 +91,3 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
     references: [users.id],
   }),
 }));
-
-/*export const userRelations = relations(users, ({ many }) => ({
-  ownerships: many(ownerships),
-}));
-
-export const productRelations = relations(products, ({ many }) => ({
-  ownerships: many(ownerships),
-}));
-
-export const ownershipsRelations = relations(ownerships, ({ one }) => ({
-  products: one(products, {
-    fields: [ownerships.productId],
-    references: [products.id],
-  }),
-  users: one(users, {
-    fields: [ownerships.userId],
-    references: [users.id],
-  }),
-}));*/

@@ -1,6 +1,6 @@
 import { UsersRound } from 'lucide-react';
-import { ModeToggle } from '@/components/mode-toggle';
-import { LogoutButton } from './logout-button';
+import { LogoutButton } from '@/components/auth/logout-button';
+import { ModeToggle } from './mode-toggle';
 import { NavButton } from './nav-button';
 
 export async function NavItemsLoggedIn() {

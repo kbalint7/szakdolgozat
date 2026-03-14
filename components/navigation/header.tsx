@@ -1,7 +1,7 @@
 import { HomeIcon } from 'lucide-react';
 import Link from 'next/link';
 
-import { NavButton } from '@/components/nav-button';
+import { NavButton } from './nav-button';
 import { Suspense } from 'react';
 import { NavItemsSkeleton } from './nav-items-skeleton';
 

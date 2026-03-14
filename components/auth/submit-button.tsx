@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Spinner } from './ui/spinner';
+import { Spinner } from '@/components/ui/spinner';
 
 export function SubmitButton({ text, loading, ...props }: { text: string; loading: boolean } & React.ComponentProps<typeof Button>) {
   if (loading) {

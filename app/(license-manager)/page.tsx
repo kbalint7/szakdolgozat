@@ -1,5 +1,5 @@
-import { Header } from '@/components/header';
-import { NavItemsDynamic } from '@/components/nav-items-dynamic';
+import { Header } from '@/components/navigation/header';
+import { NavItemsDynamic } from '@/components/navigation/nav-items-dynamic';
 
 export default function Home() {
   return (

@@ -1,5 +1,5 @@
 import { LogIn } from 'lucide-react';
-import { ModeToggle } from '@/components/mode-toggle';
+import { ModeToggle } from './mode-toggle';
 import { NavButton } from './nav-button';
 
 export function NavItems() {
