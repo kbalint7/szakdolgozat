@@ -1,7 +1,7 @@
 import { Header } from '@/components/navigation/header';
 import { NavItems } from '@/components/navigation/nav-items';
 
-export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header>

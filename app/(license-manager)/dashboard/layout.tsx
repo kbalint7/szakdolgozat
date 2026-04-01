@@ -1,7 +1,7 @@
 import { Header } from '@/components/navigation/header';
 import { NavItemsLoggedIn } from '@/components/navigation/nav-items-logged-in';
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header>

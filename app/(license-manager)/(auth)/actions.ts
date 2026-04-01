@@ -1,8 +1,9 @@
 'use server';
 
+import { APIError } from 'better-auth';
+
 import { auth } from '@/lib/auth';
 import { SignInData, signInSchema, SignUpData, signUpSchema } from '@/lib/zod';
-import { APIError } from 'better-auth';
 
 type ActionResult = {
   success: boolean;

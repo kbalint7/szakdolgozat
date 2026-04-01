@@ -5,7 +5,7 @@ import { NavButton } from './nav-button';
 import { Suspense } from 'react';
 import { NavItemsSkeleton } from './nav-items-skeleton';
 
-export async function Header({
+export function Header({
   children,
 }: Readonly<{
   children: React.ReactNode;

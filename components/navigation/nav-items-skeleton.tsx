@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-export async function NavItemsSkeleton() {
+export function NavItemsSkeleton() {
   return (
     <>
       <div className="flex items-center gap-2">
