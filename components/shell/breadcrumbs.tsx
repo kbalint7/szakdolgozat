@@ -7,9 +7,13 @@ import { Fragment, Suspense } from 'react';
 
 const segmentLabels: Record<string, string> = {
   dashboard: 'Vezérlőpult',
+  admin: 'Platform admin',
+  products: 'Termékek',
 };
 
-const dynamicLabels: Record<string, string> = {};
+const dynamicLabels: Record<string, string> = {
+  products: 'Termék',
+};
 
 type Crumb = { href: string; label: string };
 
