@@ -7,19 +7,30 @@ import { MobileNav } from '@/components/shell/mobile-nav';
 import { Sidebar } from '@/components/shell/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSession } from '@/lib/auth/session';
+import { listMyCompanies } from '@/lib/services/companies';
 
 import { DashboardNav } from './dashboard-nav';
 
 const getNavData = cache(async () => {
   const session = await getSession();
   if (!session) return null;
-  return { isPlatformAdmin: session.user.isPlatformAdmin };
+  const companies = await listMyCompanies(session.user.id);
+  return {
+    companies: companies.map(({ id, name, role }) => ({ id, name, role })),
+    isPlatformAdmin: session.user.isPlatformAdmin,
+  };
 });
 
 async function DashboardNavLoader() {
   const data = await getNavData();
   if (!data) return null;
-  return <DashboardNav isPlatformAdmin={data.isPlatformAdmin} />;
+  return <DashboardNav companies={data.companies} isPlatformAdmin={data.isPlatformAdmin} />;
+}
+
+async function BreadcrumbsLoader() {
+  const data = await getNavData();
+  const names = Object.fromEntries((data?.companies ?? []).map(company => [company.id, company.name]));
+  return <Breadcrumbs companyNames={names} />;
 }
 
 function NavSkeleton() {
@@ -41,7 +52,16 @@ export default function DashboardLayout({ children }: LayoutProps<'/dashboard'>)
   return (
     <AppShell
       sidebar={<Sidebar>{nav}</Sidebar>}
-      header={<AppHeader menu={<MobileNav>{nav}</MobileNav>} breadcrumbs={<Breadcrumbs />} />}
+      header={
+        <AppHeader
+          menu={<MobileNav>{nav}</MobileNav>}
+          breadcrumbs={
+            <Suspense fallback={null}>
+              <BreadcrumbsLoader />
+            </Suspense>
+          }
+        />
+      }
     >
       {children}
     </AppShell>

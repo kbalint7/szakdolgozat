@@ -7,6 +7,9 @@ import { Fragment, Suspense } from 'react';
 
 const segmentLabels: Record<string, string> = {
   dashboard: 'Vezérlőpult',
+  new: 'Új cég',
+  members: 'Tagok',
+  settings: 'Beállítások',
   admin: 'Platform admin',
   products: 'Termékek',
 };

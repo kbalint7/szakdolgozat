@@ -7,6 +7,15 @@ const messages: Record<string, string> = {
   PRODUCT_NOT_FOUND: 'A termék nem található.',
   PLAN_NOT_FOUND: 'A csomag nem található.',
   PLAN_INACTIVE: 'Ez a csomag már nem vásárolható meg.',
+
+  COMPANY_NOT_FOUND: 'A cég nem található.',
+  OWNER_CANNOT_LEAVE: 'A tulajdonos nem léphet ki a cégből. Előbb add át a tulajdonjogot, vagy töröld a céget.',
+  CANNOT_REMOVE_OWNER: 'A tulajdonost nem lehet eltávolítani.',
+  CANNOT_REMOVE_ADMIN: 'Adminisztrátort csak a tulajdonos távolíthat el.',
+  MEMBER_NOT_FOUND: 'A tag nem található.',
+  ALREADY_OWNER: 'Ez a felhasználó már a tulajdonos.',
+  CONFIRMATION_MISMATCH: 'A megerősítő szöveg nem egyezik a cég nevével.',
+  USER_OWNS_COMPANY: 'Amíg céged tulajdonosa vagy, a fiókod nem törölhető. Előbb add át a tulajdonjogot.',
 };
 
 export function errorMessage(code: string): string {

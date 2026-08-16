@@ -1,14 +1,51 @@
 'use client';
 
-import { LayoutDashboardIcon, ShieldIcon } from 'lucide-react';
+import { BuildingIcon, LayoutDashboardIcon, PlusIcon, SettingsIcon, ShieldIcon, UsersIcon } from 'lucide-react';
+import { useParams } from 'next/navigation';
 
-import { NavLinks, type NavSection } from '@/components/shell/nav-links';
+import { NavLinks, type NavItem, type NavSection } from '@/components/shell/nav-links';
+import { can, roleLabels, type CompanyAction, type Role } from '@/lib/domain/permissions';
 
-export function DashboardNav({ isPlatformAdmin }: { isPlatformAdmin: boolean }) {
+type CompanyLink = { id: string; name: string; role: Role };
+
+type CompanyNavItem = NavItem & { action: CompanyAction };
+
+function companyItems(companyId: string): CompanyNavItem[] {
+  const base = `/dashboard/companies/${companyId}`;
+  return [
+    { href: `${base}/members`, label: 'Tagok', icon: <UsersIcon />, action: 'members.view' },
+    { href: `${base}/settings`, label: 'Beállítások', icon: <SettingsIcon />, action: 'company.view' },
+  ];
+}
+
+export function DashboardNav({ companies, isPlatformAdmin }: { companies: CompanyLink[]; isPlatformAdmin: boolean }) {
+  const params = useParams<{ companyId?: string }>();
+
   const sections: NavSection[] = [
     {
       title: 'Személyes',
       items: [{ href: '/dashboard', label: 'Áttekintés', icon: <LayoutDashboardIcon />, exact: true }],
+    },
+    {
+      title: 'Cégeim',
+      items: [
+        ...companies.map(company => {
+          const active = company.id === params.companyId;
+          return {
+            href: `/dashboard/companies/${company.id}`,
+            label: company.name,
+            icon: <BuildingIcon />,
+            exact: true,
+            meta: active ? roleLabels[company.role] : undefined,
+            children: active
+              ? companyItems(company.id)
+                  .filter(item => can(company.role, item.action))
+                  .map(({ action: _action, ...item }) => item)
+              : undefined,
+          };
+        }),
+        { href: '/dashboard/companies/new', label: 'Új cég', icon: <PlusIcon />, exact: true },
+      ],
     },
   ];
 
