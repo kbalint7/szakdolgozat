@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboardIcon, LogOutIcon, ShieldIcon } from 'lucide-react';
+import { LayoutDashboardIcon, LogOutIcon, ShieldIcon, UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -63,6 +63,9 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => router.push('/dashboard')}>
             <LayoutDashboardIcon /> Vezérlőpult
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+            <UserIcon /> Profil
           </DropdownMenuItem>
           {user.isPlatformAdmin && (
             <DropdownMenuItem onClick={() => router.push('/admin')}>

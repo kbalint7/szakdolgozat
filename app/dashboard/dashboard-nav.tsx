@@ -1,6 +1,14 @@
 'use client';
 
-import { BuildingIcon, LayoutDashboardIcon, PlusIcon, SettingsIcon, ShieldIcon, UsersIcon } from 'lucide-react';
+import {
+  BuildingIcon,
+  LayoutDashboardIcon,
+  PlusIcon,
+  SettingsIcon,
+  ShieldIcon,
+  UserIcon,
+  UsersIcon,
+} from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 import { NavLinks, type NavItem, type NavSection } from '@/components/shell/nav-links';
@@ -24,7 +32,10 @@ export function DashboardNav({ companies, isPlatformAdmin }: { companies: Compan
   const sections: NavSection[] = [
     {
       title: 'Személyes',
-      items: [{ href: '/dashboard', label: 'Áttekintés', icon: <LayoutDashboardIcon />, exact: true }],
+      items: [
+        { href: '/dashboard', label: 'Áttekintés', icon: <LayoutDashboardIcon />, exact: true },
+        { href: '/dashboard/profile', label: 'Profil', icon: <UserIcon /> },
+      ],
     },
     {
       title: 'Cégeim',
