@@ -16,6 +16,8 @@ const messages: Record<string, string> = {
   ALREADY_OWNER: 'Ez a felhasználó már a tulajdonos.',
   CONFIRMATION_MISMATCH: 'A megerősítő szöveg nem egyezik a cég nevével.',
   USER_OWNS_COMPANY: 'Amíg céged tulajdonosa vagy, a fiókod nem törölhető. Előbb add át a tulajdonjogot.',
+
+  CAPACITY_INVARIANT_VIOLATED: 'Belső hiba: több helyet osztanánk ki, mint amennyi van.',
 };
 
 export function errorMessage(code: string): string {
