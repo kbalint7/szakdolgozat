@@ -8,15 +8,19 @@ import { Fragment, Suspense } from 'react';
 const segmentLabels: Record<string, string> = {
   dashboard: 'Vezérlőpult',
   profile: 'Profil',
+  purchase: 'Vásárlás',
   new: 'Új cég',
   members: 'Tagok',
+  licenses: 'Licencek és helyek',
   settings: 'Beállítások',
   admin: 'Platform admin',
   products: 'Termékek',
 };
 
 const dynamicLabels: Record<string, string> = {
+  licenses: 'Helyek',
   products: 'Termék',
+  purchase: 'Csomag',
 };
 
 type Crumb = { href: string; label: string };

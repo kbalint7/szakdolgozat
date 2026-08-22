@@ -17,6 +17,11 @@ const messages: Record<string, string> = {
   CONFIRMATION_MISMATCH: 'A megerősítő szöveg nem egyezik a cég nevével.',
   USER_OWNS_COMPANY: 'Amíg céged tulajdonosa vagy, a fiókod nem törölhető. Előbb add át a tulajdonjogot.',
 
+  LICENSE_KEY_UNKNOWN: 'Ismeretlen licenckulcs.',
+  LICENSE_KEY_USED: 'Ezt a licenckulcsot már aktiválták.',
+  LICENSE_KEY_REVOKED: 'Ezt a licenckulcsot visszavonták.',
+  LICENSE_NOT_FOUND: 'A licenc nem található.',
+
   CAPACITY_INVARIANT_VIOLATED: 'Belső hiba: több helyet osztanánk ki, mint amennyi van.',
 };
 

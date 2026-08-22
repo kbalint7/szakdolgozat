@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  ArmchairIcon,
   BuildingIcon,
   LayoutDashboardIcon,
   PlusIcon,
@@ -22,6 +23,7 @@ function companyItems(companyId: string): CompanyNavItem[] {
   const base = `/dashboard/companies/${companyId}`;
   return [
     { href: `${base}/members`, label: 'Tagok', icon: <UsersIcon />, action: 'members.view' },
+    { href: `${base}/licenses`, label: 'Licencek és helyek', icon: <ArmchairIcon />, action: 'licenses.view' },
     { href: `${base}/settings`, label: 'Beállítások', icon: <SettingsIcon />, action: 'company.view' },
   ];
 }

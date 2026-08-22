@@ -5,7 +5,9 @@ import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-import { SkeletonLine, SkeletonPage, SkeletonTileGrid } from '@/components/page-skeleton';
+import { Callout } from '@/components/callout';
+import { LinkButton } from '@/components/link-button';
+import { SkeletonCallout, SkeletonLine, SkeletonPage, SkeletonTileGrid } from '@/components/page-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getCatalogProduct } from '@/lib/data/catalog';
 import { formatDuration, formatHuf, formatSeats } from '@/lib/format';
@@ -73,10 +75,17 @@ async function ProductDetail({ params }: { params: PageProps<'/products/[slug]'>
                     </li>
                   ))}
                 </ul>
+                <LinkButton href={`/dashboard/purchase/${plan.id}`} className="mt-auto w-full">
+                  Vásárlás
+                </LinkButton>
               </li>
             ))}
           </ul>
         )}
+        <Callout tone="info">
+          Vásárolni a cég tulajdonosa vagy adminisztrátora tud. A kapott licenckulcsot a cég licencoldalán aktiválod, és
+          a helyek azonnal rendelkezésre állnak.
+        </Callout>
       </section>
     </>
   );
@@ -100,6 +109,7 @@ function ProductDetailSkeleton() {
           <SkeletonLine size="sm" w="w-2xl" />
         </div>
         <SkeletonTileGrid tile="plan" count={3} className="sm:grid-cols-2 lg:grid-cols-3" />
+        <SkeletonCallout title={false} lines={1} />
       </section>
     </SkeletonPage>
   );
