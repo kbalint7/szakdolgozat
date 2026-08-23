@@ -13,3 +13,7 @@ export const activateKeySchema = z.object({
     .min(1, 'Add meg a licenckulcsot.')
     .max(64, 'Érvénytelen licenckulcs.'),
 });
+
+export const issueKeySchema = z.object({
+  planId: z.uuid({ error: 'Válassz csomagot.' }),
+});
