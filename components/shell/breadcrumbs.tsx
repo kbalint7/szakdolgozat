@@ -11,6 +11,7 @@ const segmentLabels: Record<string, string> = {
   purchase: 'Vásárlás',
   new: 'Új cég',
   members: 'Tagok',
+  rules: 'Szabályok',
   licenses: 'Licencek és helyek',
   settings: 'Beállítások',
   admin: 'Platform admin',

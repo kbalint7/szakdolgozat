@@ -22,6 +22,9 @@ const messages: Record<string, string> = {
   LICENSE_KEY_REVOKED: 'Ezt a licenckulcsot visszavonták.',
   LICENSE_NOT_FOUND: 'A licenc nem található.',
 
+  RULE_EXISTS: 'Ilyen szabály már létezik.',
+  RULE_NOT_FOUND: 'A szabály nem található.',
+
   CAPACITY_INVARIANT_VIOLATED: 'Belső hiba: több helyet osztanánk ki, mint amennyi van.',
 };
 
