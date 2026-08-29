@@ -23,7 +23,7 @@ type CompanyNavItem = NavItem & { action: CompanyAction };
 function companyItems(companyId: string): CompanyNavItem[] {
   const base = `/dashboard/companies/${companyId}`;
   return [
-    { href: `${base}/members`, label: 'Tagok', icon: <UsersIcon />, action: 'members.view' },
+    { href: `${base}/members`, label: 'Tagok és meghívók', icon: <UsersIcon />, action: 'members.view' },
     { href: `${base}/rules`, label: 'Szabályok', icon: <ListChecksIcon />, action: 'rules.manage' },
     { href: `${base}/licenses`, label: 'Licencek és helyek', icon: <ArmchairIcon />, action: 'licenses.view' },
     { href: `${base}/settings`, label: 'Beállítások', icon: <SettingsIcon />, action: 'company.view' },

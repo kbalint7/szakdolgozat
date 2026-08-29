@@ -10,7 +10,7 @@ const segmentLabels: Record<string, string> = {
   profile: 'Profil',
   purchase: 'Vásárlás',
   new: 'Új cég',
-  members: 'Tagok',
+  members: 'Tagok és meghívók',
   rules: 'Szabályok',
   licenses: 'Licencek és helyek',
   settings: 'Beállítások',

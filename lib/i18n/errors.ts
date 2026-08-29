@@ -17,6 +17,18 @@ const messages: Record<string, string> = {
   CONFIRMATION_MISMATCH: 'A megerősítő szöveg nem egyezik a cég nevével.',
   USER_OWNS_COMPANY: 'Amíg céged tulajdonosa vagy, a fiókod nem törölhető. Előbb add át a tulajdonjogot.',
 
+  ALREADY_MEMBER: 'Ez a felhasználó már tagja a cégnek.',
+  INVITATION_PENDING: 'Erre az e-mail-címre már van függő meghívó.',
+  INVITATION_INVALID: 'A meghívó érvénytelen.',
+  INVITATION_EXPIRED: 'A meghívó lejárt.',
+  INVITATION_USED: 'A meghívót már felhasználták.',
+  INVITATION_REVOKED: 'A meghívót visszavonták.',
+  INVITATION_EMAIL_MISMATCH: 'A meghívó másik e-mail-címre szól. Jelentkezz be azzal a fiókkal.',
+
+  EMPLOYEE_NOT_FOUND: 'A munkavállaló nem található.',
+  EMPLOYEE_ALREADY_LINKED: 'A munkavállaló már egy másik taghoz van kapcsolva.',
+  MEMBERSHIP_ALREADY_LINKED: 'Ez a tag már egy másik munkavállalóhoz van kapcsolva.',
+
   LICENSE_KEY_UNKNOWN: 'Ismeretlen licenckulcs.',
   LICENSE_KEY_USED: 'Ezt a licenckulcsot már aktiválták.',
   LICENSE_KEY_REVOKED: 'Ezt a licenckulcsot visszavonták.',
