@@ -37,6 +37,10 @@ const messages: Record<string, string> = {
   RULE_EXISTS: 'Ilyen szabály már létezik.',
   RULE_NOT_FOUND: 'A szabály nem található.',
 
+  EVENT_NOT_FOUND: 'Az esemény nem található.',
+  EVENT_ID_CONFLICT: 'Ezzel az azonosítóval már érkezett egy eltérő tartalmú esemény.',
+  EVENT_NOT_RETRYABLE: 'Csak sikertelen esemény próbálható újra.',
+
   CAPACITY_INVARIANT_VIOLATED: 'Belső hiba: több helyet osztanánk ki, mint amennyi van.',
 };
 

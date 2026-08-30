@@ -1,7 +1,7 @@
 import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
 
 import { db, type DbOrTx, type Tx } from '@/db/drizzle';
-import { companies, employees, invitations, memberships, users } from '@/db/schema';
+import { companies, employees, invitations, memberships, users, type Employee } from '@/db/schema';
 import { randomToken, sha256 } from '@/lib/crypto';
 import { DomainError, isUniqueViolation } from '@/lib/errors';
 
@@ -94,6 +94,68 @@ export async function createInvitation(
       data: { email, role: input.role },
     });
     return { invitation, token };
+  });
+}
+
+export async function onEmployeeHired(
+  tx: Tx,
+  {
+    companyId,
+    employee,
+    actor,
+    causeEventId,
+  }: { companyId: string; employee: Employee; actor: Actor; causeEventId: string },
+) {
+  if (!employee.email || employee.membershipId) return;
+  const email = employee.email.toLowerCase();
+  const now = new Date();
+
+  const member = await memberByEmail(tx, companyId, email);
+  if (member) {
+    const [alreadyLinked] = await tx
+      .select({ id: employees.id })
+      .from(employees)
+      .where(eq(employees.membershipId, member.membershipId));
+    if (alreadyLinked) return;
+    await tx.update(employees).set({ membershipId: member.membershipId }).where(eq(employees.id, employee.id));
+    await audit(tx, {
+      companyId,
+      actor,
+      action: 'membership.linked',
+      targetType: 'membership',
+      targetId: member.membershipId,
+      employeeId: employee.id,
+      causeEventId,
+      data: { userId: member.userId, via: 'hr_email' },
+    });
+    return;
+  }
+
+  const [pending] = await tx
+    .select({ id: invitations.id, employeeId: invitations.employeeId })
+    .from(invitations)
+    .where(and(eq(invitations.companyId, companyId), eq(invitations.email, email), pendingCondition(now)));
+  if (pending) {
+    if (!pending.employeeId) {
+      await tx.update(invitations).set({ employeeId: employee.id }).where(eq(invitations.id, pending.id));
+    }
+    return;
+  }
+
+  const { tokenHash, expiresAt } = newToken(now);
+  const [invitation] = await tx
+    .insert(invitations)
+    .values({ companyId, email, role: 'member', tokenHash, expiresAt, employeeId: employee.id })
+    .returning({ id: invitations.id });
+  await audit(tx, {
+    companyId,
+    actor,
+    action: 'invitation.created',
+    targetType: 'invitation',
+    targetId: invitation.id,
+    employeeId: employee.id,
+    causeEventId,
+    data: { email, role: 'member', via: 'hr_event' },
   });
 }
 
