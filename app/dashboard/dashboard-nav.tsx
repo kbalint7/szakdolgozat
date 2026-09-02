@@ -3,6 +3,8 @@
 import {
   ArmchairIcon,
   BuildingIcon,
+  ContactIcon,
+  InboxIcon,
   LayoutDashboardIcon,
   ListChecksIcon,
   PlusIcon,
@@ -24,8 +26,10 @@ function companyItems(companyId: string): CompanyNavItem[] {
   const base = `/dashboard/companies/${companyId}`;
   return [
     { href: `${base}/members`, label: 'Tagok és meghívók', icon: <UsersIcon />, action: 'members.view' },
+    { href: `${base}/employees`, label: 'Munkavállalók', icon: <ContactIcon />, action: 'employees.view' },
     { href: `${base}/rules`, label: 'Szabályok', icon: <ListChecksIcon />, action: 'rules.manage' },
     { href: `${base}/licenses`, label: 'Licencek és helyek', icon: <ArmchairIcon />, action: 'licenses.view' },
+    { href: `${base}/events`, label: 'HR-események', icon: <InboxIcon />, action: 'hrEvents.view' },
     { href: `${base}/settings`, label: 'Beállítások', icon: <SettingsIcon />, action: 'company.view' },
   ];
 }

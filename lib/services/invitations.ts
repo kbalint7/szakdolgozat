@@ -365,3 +365,67 @@ export async function declineInvitation(user: { id: string; email: string }, tok
     });
   });
 }
+
+export async function linkMemberToEmployee(actor: Actor, companyId: string, employeeId: string, membershipId: string) {
+  try {
+    await db.transaction(async tx => {
+      const [employee] = await tx
+        .select()
+        .from(employees)
+        .where(and(eq(employees.id, employeeId), eq(employees.companyId, companyId)))
+        .for('update');
+      if (!employee) throw new DomainError('EMPLOYEE_NOT_FOUND');
+      if (employee.membershipId) throw new DomainError('EMPLOYEE_ALREADY_LINKED');
+      const [membership] = await tx
+        .select({ id: memberships.id, userId: memberships.userId })
+        .from(memberships)
+        .where(and(eq(memberships.id, membershipId), eq(memberships.companyId, companyId)));
+      if (!membership) throw new DomainError('MEMBER_NOT_FOUND');
+      await tx.update(employees).set({ membershipId }).where(eq(employees.id, employeeId));
+      await audit(tx, {
+        companyId,
+        actor,
+        action: 'membership.linked',
+        targetType: 'membership',
+        targetId: membershipId,
+        employeeId,
+        data: { userId: membership.userId, via: 'manual' },
+      });
+    });
+  } catch (error) {
+    if (isUniqueViolation(error)) throw new DomainError('MEMBERSHIP_ALREADY_LINKED');
+    throw error;
+  }
+}
+
+export async function unlinkEmployee(actor: Actor, companyId: string, employeeId: string) {
+  await db.transaction(async tx => {
+    const [employee] = await tx
+      .select()
+      .from(employees)
+      .where(and(eq(employees.id, employeeId), eq(employees.companyId, companyId)))
+      .for('update');
+    if (!employee) throw new DomainError('EMPLOYEE_NOT_FOUND');
+    if (!employee.membershipId) return;
+    await tx.update(employees).set({ membershipId: null }).where(eq(employees.id, employeeId));
+    await audit(tx, {
+      companyId,
+      actor,
+      action: 'membership.unlinked',
+      targetType: 'membership',
+      targetId: employee.membershipId,
+      employeeId,
+      data: { via: 'manual' },
+    });
+  });
+}
+
+export async function listUnlinkedMembers(companyId: string) {
+  return db
+    .select({ membershipId: memberships.id, name: users.name, email: users.email })
+    .from(memberships)
+    .innerJoin(users, eq(users.id, memberships.userId))
+    .leftJoin(employees, eq(employees.membershipId, memberships.id))
+    .where(and(eq(memberships.companyId, companyId), isNull(employees.id)))
+    .orderBy(users.name);
+}

@@ -11,8 +11,10 @@ const segmentLabels: Record<string, string> = {
   purchase: 'Vásárlás',
   new: 'Új cég',
   members: 'Tagok és meghívók',
+  employees: 'Munkavállalók',
   rules: 'Szabályok',
   licenses: 'Licencek és helyek',
+  events: 'HR-események',
   settings: 'Beállítások',
   admin: 'Platform admin',
   products: 'Termékek',
@@ -20,6 +22,7 @@ const segmentLabels: Record<string, string> = {
 };
 
 const dynamicLabels: Record<string, string> = {
+  employees: 'Munkavállaló',
   licenses: 'Helyek',
   products: 'Termék',
   purchase: 'Csomag',
