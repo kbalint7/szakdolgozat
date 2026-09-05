@@ -23,6 +23,12 @@ export const hrEventSourceLabels: Record<string, string> = {
   ui: 'Kézi rögzítés',
 };
 
+export const actorTypeLabels: Record<string, string> = {
+  user: 'Felhasználó',
+  api_key: 'API-kulcs',
+  system: 'Rendszer',
+};
+
 export const auditActionLabels: Record<string, string> = {
   'product.created': 'Termék létrehozva',
   'product.updated': 'Termék módosítva',

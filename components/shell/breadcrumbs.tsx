@@ -15,6 +15,7 @@ const segmentLabels: Record<string, string> = {
   rules: 'Szabályok',
   licenses: 'Licencek és helyek',
   events: 'HR-események',
+  audit: 'Audit napló',
   settings: 'Beállítások',
   admin: 'Platform admin',
   products: 'Termékek',
