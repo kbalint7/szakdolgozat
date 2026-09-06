@@ -1,5 +1,6 @@
+import { cn } from 'cn';
+
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'primary';
 

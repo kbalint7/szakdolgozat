@@ -1,5 +1,6 @@
+import { cn } from 'cn';
+
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { cn } from '@/lib/utils';
 
 export function EmptyState({
   icon,

@@ -1,7 +1,6 @@
 import { ArrowLeftIcon } from 'lucide-react';
+import { cn } from 'cn';
 import Link from 'next/link';
-
-import { cn } from '@/lib/utils';
 
 export function PageHeader({
   title,

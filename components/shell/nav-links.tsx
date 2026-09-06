@@ -1,10 +1,9 @@
 'use client';
 
+import { cn } from 'cn';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense } from 'react';
-
-import { cn } from '@/lib/utils';
 
 export type NavItem = {
   href: string;

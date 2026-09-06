@@ -1,5 +1,6 @@
+import { cn } from 'cn';
+
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 
 const lineSizes = {
   xs: ['h-4', 'h-2.5'],

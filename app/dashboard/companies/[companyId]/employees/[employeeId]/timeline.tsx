@@ -1,3 +1,4 @@
+import { cn } from 'cn';
 import {
   ArmchairIcon,
   ArmchairIcon as SeatIcon,
@@ -19,7 +20,6 @@ import {
 } from '@/lib/i18n/labels';
 import { seatReasonLabel } from '@/lib/i18n/reasons';
 import type { TimelineItem } from '@/lib/services/employees';
-import { cn } from '@/lib/utils';
 
 function describeDecision(item: Extract<TimelineItem, { kind: 'decision' }>) {
   const data = item.data ?? {};

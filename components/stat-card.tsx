@@ -1,6 +1,5 @@
+import { cn } from 'cn';
 import Link from 'next/link';
-
-import { cn } from '@/lib/utils';
 
 export type Tone = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
 

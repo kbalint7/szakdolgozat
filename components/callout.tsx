@@ -1,6 +1,5 @@
+import { cn } from 'cn';
 import { BookOpenIcon, InfoIcon, TriangleAlertIcon } from 'lucide-react';
-
-import { cn } from '@/lib/utils';
 
 const tones = {
   info: { icon: <InfoIcon />, classes: 'border-info/40 bg-info/5 text-foreground [&_svg]:text-info' },

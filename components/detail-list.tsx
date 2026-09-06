@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from 'cn';
 
 export function DetailList({ children, className }: { children: React.ReactNode; className?: string }) {
   return <dl className={cn('grid gap-3', className)}>{children}</dl>;
