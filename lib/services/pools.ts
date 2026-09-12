@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, lte, sql } from 'drizzle-orm';
 
 import { db, type Tx } from '@/db/drizzle';
 import { companies, employees, entitlementRules, licenses, seatAssignments, seatPools } from '@/db/schema';
@@ -285,7 +285,11 @@ async function companyProductIds(tx: Tx, companyId: string): Promise<string[]> {
   return rows.rows.map(row => row.product_id);
 }
 
-export async function reconcileCompany(companyId: string, actor: Actor, now = new Date()) {
+export async function reconcileCompany(
+  companyId: string,
+  actor: Actor,
+  { now = new Date(), auditUnchanged = true }: { now?: Date; auditUnchanged?: boolean } = {},
+) {
   return db.transaction(async tx => {
     const [company] = await tx
       .select({ id: companies.id })
@@ -303,14 +307,77 @@ export async function reconcileCompany(companyId: string, actor: Actor, now = ne
         .where(and(eq(seatPools.companyId, companyId), eq(seatPools.productId, productId)));
     }
     const changes = summaries.reduce((sum, s) => sum + s.actions.length, 0);
-    await audit(tx, {
-      companyId,
-      actor,
-      action: 'company.reconciled',
-      targetType: 'company',
-      targetId: companyId,
-      data: { pools: summaries.length, changes },
-    });
+    if (changes > 0 || auditUnchanged) {
+      await audit(tx, {
+        companyId,
+        actor,
+        action: 'company.reconciled',
+        targetType: 'company',
+        targetId: companyId,
+        data: { pools: summaries.length, changes },
+      });
+    }
     return { pools: summaries.length, changes, summaries };
   });
+}
+
+export async function listLiveCompanyIds(): Promise<string[]> {
+  const rows = await db
+    .select({ id: companies.id })
+    .from(companies)
+    .where(isNull(companies.deletedAt))
+    .orderBy(asc(companies.id));
+  return rows.map(row => row.id);
+}
+
+export async function expireLicenses(actor: Actor, now = new Date()) {
+  const due = await db
+    .select({
+      id: licenses.id,
+      companyId: licenses.companyId,
+      productId: licenses.productId,
+      seatCount: licenses.seatCount,
+      validUntil: licenses.validUntil,
+    })
+    .from(licenses)
+    .innerJoin(companies, and(eq(companies.id, licenses.companyId), isNull(companies.deletedAt)))
+    .where(and(eq(licenses.status, 'active'), lte(licenses.validUntil, now), isNull(licenses.expiryProcessedAt)))
+    .orderBy(asc(licenses.companyId), asc(licenses.productId));
+
+  const pools = new Map<string, typeof due>();
+  for (const license of due) {
+    const key = `${license.companyId}:${license.productId}`;
+    pools.set(key, [...(pools.get(key) ?? []), license]);
+  }
+
+  let requeued = 0;
+  for (const poolLicenses of pools.values()) {
+    const { companyId, productId } = poolLicenses[0];
+    requeued += await db.transaction(async tx => {
+      const summary = await recomputePool(tx, { companyId, productId, now, cause: { actor } });
+      await tx
+        .update(licenses)
+        .set({ expiryProcessedAt: now })
+        .where(
+          inArray(
+            licenses.id,
+            poolLicenses.map(license => license.id),
+          ),
+        );
+      await audit(
+        tx,
+        ...poolLicenses.map(license => ({
+          companyId,
+          actor,
+          action: 'license.expired',
+          targetType: 'license',
+          targetId: license.id,
+          reason: 'LICENSE_EXPIRED',
+          data: { productId, seatCount: license.seatCount, validUntil: license.validUntil?.toISOString() },
+        })),
+      );
+      return summary.actions.filter(action => action.type === 'REQUEUE').length;
+    });
+  }
+  return { licenses: due.length, pools: pools.size, requeued };
 }

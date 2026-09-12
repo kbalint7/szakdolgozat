@@ -298,6 +298,7 @@ export const licenses = pgTable(
     status: licenseStatus('status').notNull().default('active'),
     createdAt: timestamptz('created_at').defaultNow().notNull(),
     revokedAt: timestamptz('revoked_at'),
+    expiryProcessedAt: timestamptz('expiry_processed_at'),
   },
   t => [
     index('licenses_company_product_idx').on(t.companyId, t.productId),

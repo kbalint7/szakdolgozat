@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, lte, or, sql } from 'drizzle-orm';
 
 import { db, type Tx } from '@/db/drizzle';
 import {
@@ -273,6 +273,24 @@ async function recordFailure(event: HrEvent, error: unknown, now: Date): Promise
     error: message,
   });
   return { outcome: 'failed', error: message, retryAt };
+}
+
+export async function processDueEvents(limit = 50, now = new Date()) {
+  const due = await db
+    .select({ id: hrEvents.id })
+    .from(hrEvents)
+    .where(
+      and(
+        or(eq(hrEvents.status, 'pending'), eq(hrEvents.status, 'failed')),
+        isNotNull(hrEvents.nextAttemptAt),
+        lte(hrEvents.nextAttemptAt, now),
+      ),
+    )
+    .orderBy(asc(hrEvents.receivedAt))
+    .limit(limit);
+  const results: ProcessResult[] = [];
+  for (const { id } of due) results.push(await processEvent(id));
+  return results;
 }
 
 export async function retryEvent(actor: Actor, companyId: string, id: string) {

@@ -1,0 +1,1 @@
+ALTER TABLE "licenses" ADD COLUMN "expiry_processed_at" timestamp with time zone;
