@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  AppWindowIcon,
   ArmchairIcon,
   BuildingIcon,
   ContactIcon,
@@ -44,6 +45,7 @@ export function DashboardNav({ companies, isPlatformAdmin }: { companies: Compan
       title: 'Személyes',
       items: [
         { href: '/dashboard', label: 'Áttekintés', icon: <LayoutDashboardIcon />, exact: true },
+        { href: '/dashboard/software', label: 'Szoftvereim', icon: <AppWindowIcon /> },
         { href: '/dashboard/profile', label: 'Profil', icon: <UserIcon /> },
       ],
     },

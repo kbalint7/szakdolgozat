@@ -1,4 +1,12 @@
-import { BuildingIcon, ChevronRightIcon, UsersIcon } from 'lucide-react';
+import {
+  AppWindowIcon,
+  ArrowRightIcon,
+  BuildingIcon,
+  ChevronRightIcon,
+  HourglassIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+} from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -7,17 +15,22 @@ import { EmptyState } from '@/components/empty-state';
 import { LinkButton } from '@/components/link-button';
 import { PageHeader } from '@/components/page-header';
 import { Section } from '@/components/section';
+import { SoftwareStatus } from '@/components/software-status';
 import { StatCard, StatGrid } from '@/components/stat-card';
 import { Badge } from '@/components/ui/badge';
 import { requireUser } from '@/lib/auth/session';
 import { can, roleLabels } from '@/lib/domain/permissions';
+import { formatDate } from '@/lib/format';
 import { listMyCompanies } from '@/lib/services/companies';
+import { getMySoftware } from '@/lib/services/license-check';
 
 export const metadata: Metadata = { title: 'Vezérlőpult' };
 
 export default async function DashboardPage() {
   const user = await requireUser();
-  const companies = await listMyCompanies(user.id);
+  const [companies, software] = await Promise.all([listMyCompanies(user.id), getMySoftware(user.id)]);
+  const allowed = software.rows.filter(row => row.status === 'allowed').length;
+  const waiting = software.rows.filter(row => row.status === 'waiting').length;
   const managed = companies.filter(company => can(company.role, 'licenses.view')).length;
 
   return (
@@ -36,6 +49,13 @@ export default async function DashboardPage() {
           hint="tulajdonosként vagy adminisztrátorként"
           icon={<UsersIcon />}
         />
+        <StatCard label="Használható szoftverek" value={allowed} icon={<ShieldCheckIcon />} tone="success" />
+        <StatCard
+          label="Várólistán"
+          value={waiting}
+          icon={<HourglassIcon />}
+          tone={waiting > 0 ? 'warning' : 'default'}
+        />
       </StatGrid>
 
       {companies.length === 0 && (
@@ -44,6 +64,48 @@ export default async function DashboardPage() {
           jár. Amint a munkatársaid bekerülnek a rendszerbe, automatikusan helyet kapnak.
         </Callout>
       )}
+
+      <Section
+        title="Hozzáféréseim"
+        description="Melyik szoftvert melyik cégen keresztül használhatod."
+        actions={
+          <LinkButton href="/dashboard/software" variant="ghost">
+            Részletek <ArrowRightIcon data-icon="inline-end" />
+          </LinkButton>
+        }
+      >
+        {software.rows.length === 0 ? (
+          <EmptyState
+            compact
+            icon={<AppWindowIcon />}
+            title="Még nincs használható szoftvered"
+            description="Helyet akkor kapsz, ha a céged munkavállalóként tart nyilván, és a munkakörödhöz tartozik szoftver."
+          />
+        ) : (
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {software.rows.map(row => (
+              <li
+                key={`${row.companyId}-${row.productId}`}
+                className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-card ring-1 ring-foreground/8"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-medium">{row.productName}</div>
+                    <div className="truncate text-sm text-muted-foreground">{row.companyName}</div>
+                  </div>
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <AppWindowIcon className="size-4" />
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                  <SoftwareStatus row={row} />
+                  <span>{row.validUntil ? `${formatDate(row.validUntil)}-ig` : 'határozatlan ideig'}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
 
       <Section
         title="Cégeim"

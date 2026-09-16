@@ -170,6 +170,17 @@ export default async function CompanyOverviewPage({ params }: PageProps<'/dashbo
           )}
         </Section>
       )}
+
+      {!isAdmin && (
+        <Callout tone="note" title="Mit látsz tagként?">
+          A saját hozzáféréseidet a{' '}
+          <Link href="/dashboard/software" className="font-medium text-foreground underline underline-offset-4">
+            Szoftvereim
+          </Link>{' '}
+          oldalon találod. A cég kezelését (szabályok, licencek, munkavállalók) a tulajdonos és az adminisztrátorok
+          végzik.
+        </Callout>
+      )}
     </>
   );
 }
