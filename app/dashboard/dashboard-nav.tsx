@@ -6,6 +6,7 @@ import {
   BuildingIcon,
   ContactIcon,
   InboxIcon,
+  KeyRoundIcon,
   LayoutDashboardIcon,
   ListChecksIcon,
   PlusIcon,
@@ -32,6 +33,7 @@ function companyItems(companyId: string): CompanyNavItem[] {
     { href: `${base}/rules`, label: 'Szabályok', icon: <ListChecksIcon />, action: 'rules.manage' },
     { href: `${base}/licenses`, label: 'Licencek és helyek', icon: <ArmchairIcon />, action: 'licenses.view' },
     { href: `${base}/events`, label: 'HR-események', icon: <InboxIcon />, action: 'hrEvents.view' },
+    { href: `${base}/api-keys`, label: 'API-kulcsok', icon: <KeyRoundIcon />, action: 'apiKeys.manage' },
     { href: `${base}/audit`, label: 'Audit napló', icon: <ScrollTextIcon />, action: 'audit.view' },
     { href: `${base}/settings`, label: 'Beállítások', icon: <SettingsIcon />, action: 'company.view' },
   ];

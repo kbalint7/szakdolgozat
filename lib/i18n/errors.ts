@@ -37,6 +37,8 @@ const messages: Record<string, string> = {
   RULE_EXISTS: 'Ilyen szabály már létezik.',
   RULE_NOT_FOUND: 'A szabály nem található.',
 
+  API_KEY_NOT_FOUND: 'Az API-kulcs nem található.',
+
   EVENT_NOT_FOUND: 'Az esemény nem található.',
   EVENT_ID_CONFLICT: 'Ezzel az azonosítóval már érkezett egy eltérő tartalmú esemény.',
   EVENT_NOT_RETRYABLE: 'Csak sikertelen esemény próbálható újra.',

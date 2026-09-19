@@ -23,3 +23,11 @@ export function generateLicenseKey(): string {
 export function normalizeLicenseKey(input: string): string {
   return input.trim().toUpperCase().replace(/\s+/g, '');
 }
+
+export type PrefixedSecret = { token: string; prefix: string; hash: string };
+
+export function generatePrefixedSecret(kind: string): PrefixedSecret {
+  const prefix = randomBytes(4).toString('hex');
+  const token = `${kind}_${prefix}_${randomToken(32)}`;
+  return { token, prefix, hash: sha256(token) };
+}

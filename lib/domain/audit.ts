@@ -8,6 +8,7 @@ export const AUDIT_CATEGORIES = [
   'order',
   'membership',
   'invitation',
+  'api_key',
   'company',
   'product',
   'plan',

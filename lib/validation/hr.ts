@@ -24,6 +24,11 @@ export const manualEventSchema = z
     }
   });
 
+export const apiKeySchema = z.object({
+  name: z.string().trim().min(1, 'Adj nevet a kulcsnak.').max(100, 'Legfeljebb 100 karakter.'),
+  scopes: z.array(z.enum(['hr:events:write', 'hr:events:read'])).min(1, 'Legalább egy jogosultságot válassz.'),
+});
+
 export const employeeFilterSchema = z.object({
   q: z.string().trim().max(100).optional().catch(undefined),
   status: z.enum(['active', 'terminated']).optional().catch(undefined),

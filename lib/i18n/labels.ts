@@ -62,6 +62,8 @@ export const auditActionLabels: Record<string, string> = {
   'license.expired': 'Licenc lejárt',
   'rule.created': 'Szabály létrehozva',
   'rule.deleted': 'Szabály törölve',
+  'api_key.created': 'API-kulcs létrehozva',
+  'api_key.revoked': 'API-kulcs visszavonva',
   'employee.hired': 'Munkavállaló belépett',
   'employee.rehired': 'Munkavállaló újra belépett',
   'employee.role_changed': 'Munkakör megváltozott',
