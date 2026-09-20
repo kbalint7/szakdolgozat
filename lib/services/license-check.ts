@@ -1,7 +1,16 @@
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 
 import { db } from '@/db/drizzle';
-import { companies, employees, licenses, memberships, products, seatAssignments } from '@/db/schema';
+import {
+  companies,
+  employees,
+  licenseChecks,
+  licenses,
+  memberships,
+  products,
+  seatAssignments,
+  users,
+} from '@/db/schema';
 import { earliestExpiry, poolCapacity } from '@/lib/domain/capacity';
 import type { CompanyEvaluation } from '@/lib/domain/license-check';
 
@@ -165,4 +174,24 @@ export async function getMySoftware(userId: string, now = new Date()) {
     rows,
     unlinkedCompanies: userMemberships.filter(m => !m.employeeId).map(m => ({ id: m.companyId, name: m.companyName })),
   };
+}
+
+export async function listRecentChecks(companyId: string, limit = 100) {
+  return db
+    .select({
+      id: licenseChecks.id,
+      createdAt: licenseChecks.createdAt,
+      allowed: licenseChecks.allowed,
+      reason: licenseChecks.reason,
+      productSlug: licenseChecks.productSlug,
+      productName: products.name,
+      userName: users.name,
+      userEmail: users.email,
+    })
+    .from(licenseChecks)
+    .leftJoin(products, eq(products.id, licenseChecks.productId))
+    .leftJoin(users, eq(users.id, licenseChecks.userId))
+    .where(eq(licenseChecks.companyId, companyId))
+    .orderBy(desc(licenseChecks.id))
+    .limit(limit);
 }

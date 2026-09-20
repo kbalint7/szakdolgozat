@@ -38,6 +38,7 @@ const messages: Record<string, string> = {
   RULE_NOT_FOUND: 'A szabály nem található.',
 
   API_KEY_NOT_FOUND: 'Az API-kulcs nem található.',
+  CLIENT_TOKEN_NOT_FOUND: 'A kliens token nem található.',
 
   EVENT_NOT_FOUND: 'Az esemény nem található.',
   EVENT_ID_CONFLICT: 'Ezzel az azonosítóval már érkezett egy eltérő tartalmú esemény.',

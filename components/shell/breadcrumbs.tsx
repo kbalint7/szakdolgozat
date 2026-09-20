@@ -8,6 +8,7 @@ import { Fragment, Suspense } from 'react';
 const segmentLabels: Record<string, string> = {
   dashboard: 'Vezérlőpult',
   software: 'Szoftvereim',
+  tokens: 'Kliens tokenek',
   profile: 'Profil',
   purchase: 'Vásárlás',
   new: 'Új cég',
@@ -16,6 +17,7 @@ const segmentLabels: Record<string, string> = {
   rules: 'Szabályok',
   licenses: 'Licencek és helyek',
   events: 'HR-események',
+  checks: 'Ellenőrzések',
   'api-keys': 'API-kulcsok',
   audit: 'Audit napló',
   settings: 'Beállítások',

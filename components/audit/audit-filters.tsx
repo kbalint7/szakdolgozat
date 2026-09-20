@@ -18,6 +18,7 @@ export const categoryLabels: Record<string, string> = {
   membership: 'Tagságok',
   invitation: 'Meghívók',
   api_key: 'API-kulcsok',
+  client_token: 'Kliens tokenek',
   company: 'Cég',
   product: 'Termékek',
   plan: 'Csomagok',

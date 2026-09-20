@@ -23,6 +23,15 @@ export const hrEventSourceLabels: Record<string, string> = {
   ui: 'Kézi rögzítés',
 };
 
+export const checkReasonLabels: Record<string, string> = {
+  NOT_MEMBER: 'nem tagja egy cégnek sem',
+  NOT_LINKED: 'nincs munkavállalóhoz kapcsolva',
+  NOT_ELIGIBLE: 'nem jogosult',
+  WAITLISTED: 'várólistán',
+  NO_VALID_LICENSE: 'nincs érvényes licenc',
+  PRODUCT_NOT_FOUND: 'ismeretlen termék',
+};
+
 export const actorTypeLabels: Record<string, string> = {
   user: 'Felhasználó',
   api_key: 'API-kulcs',
@@ -64,6 +73,8 @@ export const auditActionLabels: Record<string, string> = {
   'rule.deleted': 'Szabály törölve',
   'api_key.created': 'API-kulcs létrehozva',
   'api_key.revoked': 'API-kulcs visszavonva',
+  'client_token.created': 'Kliens token létrehozva',
+  'client_token.revoked': 'Kliens token visszavonva',
   'employee.hired': 'Munkavállaló belépett',
   'employee.rehired': 'Munkavállaló újra belépett',
   'employee.role_changed': 'Munkakör megváltozott',
