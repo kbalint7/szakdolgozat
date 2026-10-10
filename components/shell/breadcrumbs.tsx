@@ -24,6 +24,7 @@ const segmentLabels: Record<string, string> = {
   admin: 'Platform admin',
   products: 'Termékek',
   orders: 'Rendelések',
+  stats: 'Statisztika',
 };
 
 const dynamicLabels: Record<string, string> = {
