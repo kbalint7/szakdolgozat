@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Licenckezelő
 
-## Getting Started
+Vállalati szoftverlicencek kezelése munkakörök alapján. A szoftverforgalmazó helyalapú licenceket értékesít cégeknek,
+a cégeken belül pedig a helyeket nem kézzel osztják ki: a rendszer a szabályokból (melyik munkakörnek melyik szoftver
+jár) és a munkavállalók adataiból (belépés, munkakörváltás, kilépés) automatikusan kiosztja és visszaveszi őket.
 
-First, run the development server:
+Technológiák: Next.js 16, React 19, TypeScript, Tailwind CSS, shadcn/ui, PostgreSQL 17, Drizzle ORM, Better Auth.
+
+## Követelmények
+
+- [Docker](https://www.docker.com/) (Docker Desktop, vagy Docker Engine a Compose bővítménnyel)
+
+## Telepítés és indítás
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/kbalint7/szakdolgozat.git
+cd szakdolgozat
+cp .env.example .env
+docker compose up -d --build
+docker compose exec app pnpm db:mig
+docker compose exec app pnpm db:seed
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Az alkalmazás ezután a <http://localhost:3000> címen érhető el. Az első indítás a build miatt néhány percig tart.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+A `.env` alapértékeivel az alkalmazás helyben rögtön működik. Ha nem csak kipróbálásra használod, a
+`BETTER_AUTH_SECRET` értékét cseréld le egy véletlen szövegre (például `openssl rand -base64 32`).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Leállítás:
 
-## Learn More
+```bash
+docker compose down      # az adatok megmaradnak
+docker compose down -v   # az adatbázis is törlődik
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Demó fiókok
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+A `db:seed` parancs bemutató adatokat hoz létre: két terméket csomagokkal, két céget, munkavállalókat, szabályokat és
+licenceket.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| E-mail | Jelszó | Szerep |
+| --- | --- | --- |
+| `admin@licenckezelo.test` | `Admin1234` | platformadmin: termékek, csomagok, rendelések, statisztika |
+| `tulajdonos@pelda.test` | `Demo1234` | a _Példa Kft._ tulajdonosa |
+| `admin@pelda.test` | `Demo1234` | a _Példa Kft._ adminisztrátora |
+| `anna.kiss@pelda.test` | `Demo1234` | a _Példa Kft._ tagja és munkavállalója, van IDE Pro helye |
+| `tulajdonos@masik.test` | `Demo1234` | a _Másik Zrt._ tulajdonosa |
 
-## Deploy on Vercel
+## Kipróbálás
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Jelentkezz be a `tulajdonos@pelda.test` fiókkal, és nyisd meg a **Termékek** oldalt.
+2. Válassz egy csomagot, és vásárold meg a cégnek (a fizetés szimulált). Vásárláskor a licencet rögtön aktiválhatod,
+   vagy a kapott licenckulcsot később a cég **Licencek és helyek** oldalán.
+3. A helyeket a rendszer a cég szabályai szerint azonnal kiosztja. Ezt a **Licencek és helyek**, a
+   **Munkavállalók** és az **Audit napló** oldalon követheted.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Fejlesztés
+
+Helyi fejlesztéshez Node.js 22 vagy újabb és pnpm kell (`corepack enable`). Az adatbázis ilyenkor is Dockerben fut:
+
+```bash
+cp .env.example .env
+pnpm install
+pnpm db:up
+pnpm db:mig
+pnpm db:seed
+pnpm dev      # http://localhost:3000
+pnpm worker   # külön terminálban: újrapróbálások, licenclejárat, egyeztetés
+```
