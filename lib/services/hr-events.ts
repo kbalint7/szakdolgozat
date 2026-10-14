@@ -353,4 +353,20 @@ export async function countHrEventsByStatus(companyId: string) {
   return Object.fromEntries(rows.map(row => [row.status, row.value])) as Partial<Record<HrEventStatus, number>>;
 }
 
+export async function getHrEventStatus(companyId: string, eventId: string) {
+  const [event] = await db
+    .select({
+      eventId: hrEvents.eventId,
+      status: hrEvents.status,
+      attempts: hrEvents.attempts,
+      lastError: hrEvents.lastError,
+      receivedAt: hrEvents.receivedAt,
+      processedAt: hrEvents.processedAt,
+      nextAttemptAt: hrEvents.nextAttemptAt,
+    })
+    .from(hrEvents)
+    .where(and(eq(hrEvents.companyId, companyId), eq(hrEvents.eventId, eventId)));
+  return event ?? null;
+}
+
 export { MAX_ATTEMPTS };

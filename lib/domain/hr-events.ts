@@ -1,4 +1,4 @@
-import { z } from '@/lib/validation/zod';
+import { englishErrors, z } from '@/lib/validation/zod';
 
 export const HR_EVENT_TYPES = ['employee.hired', 'employee.role_changed', 'employee.terminated'] as const;
 export type HrEventType = (typeof HR_EVENT_TYPES)[number];
@@ -29,6 +29,10 @@ export const hrEventSchema = z
   });
 
 export type HrEventInput = z.infer<typeof hrEventSchema>;
+
+export function parseHrEvent(body: unknown) {
+  return hrEventSchema.safeParse(body, englishErrors);
+}
 
 export function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;

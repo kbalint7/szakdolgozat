@@ -1,8 +1,8 @@
 import { and, desc, eq, isNull } from 'drizzle-orm';
 
 import { db } from '@/db/drizzle';
-import { apiKeys, users } from '@/db/schema';
-import { generatePrefixedSecret } from '@/lib/crypto';
+import { apiKeys, companies, users } from '@/db/schema';
+import { generatePrefixedSecret, hashesEqual, parsePrefixedSecret, sha256 } from '@/lib/crypto';
 import { DomainError } from '@/lib/errors';
 
 import { audit, type Actor } from './audit';
@@ -76,4 +76,21 @@ export async function revokeApiKey(actor: Actor, companyId: string, keyId: strin
       data: { prefix: key.prefix },
     });
   });
+}
+
+export type AuthenticatedApiKey = { id: string; companyId: string; scopes: string[] };
+
+export async function authenticateApiKey(token: string): Promise<AuthenticatedApiKey | null> {
+  const parsed = parsePrefixedSecret(API_KEY_KIND, token);
+  if (!parsed) return null;
+  const candidates = await db
+    .select({ id: apiKeys.id, companyId: apiKeys.companyId, scopes: apiKeys.scopes, keyHash: apiKeys.keyHash })
+    .from(apiKeys)
+    .innerJoin(companies, eq(companies.id, apiKeys.companyId))
+    .where(and(eq(apiKeys.prefix, parsed.prefix), isNull(apiKeys.revokedAt), isNull(companies.deletedAt)));
+  const hash = sha256(token);
+  const key = candidates.find(candidate => hashesEqual(candidate.keyHash, hash));
+  if (!key) return null;
+  await db.update(apiKeys).set({ lastUsedAt: new Date() }).where(eq(apiKeys.id, key.id));
+  return { id: key.id, companyId: key.companyId, scopes: key.scopes };
 }
