@@ -12,7 +12,8 @@ import {
   users,
 } from '@/db/schema';
 import { earliestExpiry, poolCapacity } from '@/lib/domain/capacity';
-import type { CompanyEvaluation } from '@/lib/domain/license-check';
+import { decideCheck, type CheckDecision, type CompanyEvaluation } from '@/lib/domain/license-check';
+import { logger } from '@/lib/logger';
 
 type SeatRow = {
   companyId: string;
@@ -109,6 +110,63 @@ async function loadEvaluations(userId: string, productId: string, now: Date) {
     };
   });
   return { evaluations, licensesByCompany };
+}
+
+export type CheckResult =
+  | { found: false }
+  | {
+      found: true;
+      product: { id: string; slug: string };
+      decision: CheckDecision;
+      validUntil: Date | null;
+      checkedAt: Date;
+    };
+
+export async function checkLicense(
+  user: { userId: string; clientTokenId?: string },
+  productSlug: string,
+  now = new Date(),
+): Promise<CheckResult> {
+  const started = performance.now();
+  const [product] = await db
+    .select({ id: products.id, slug: products.slug })
+    .from(products)
+    .where(eq(products.slug, productSlug));
+
+  if (!product) {
+    await db.insert(licenseChecks).values({
+      userId: user.userId,
+      clientTokenId: user.clientTokenId ?? null,
+      productSlug,
+      allowed: false,
+      reason: 'PRODUCT_NOT_FOUND',
+    });
+    return { found: false };
+  }
+
+  const { evaluations, licensesByCompany } = await loadEvaluations(user.userId, product.id, now);
+  const decision = decideCheck(evaluations);
+  const companyId = decision.companyId ?? null;
+  const validUntil = decision.allowed ? earliestExpiry(licensesByCompany.get(decision.companyId) ?? [], now) : null;
+
+  await db.insert(licenseChecks).values({
+    userId: user.userId,
+    clientTokenId: user.clientTokenId ?? null,
+    productId: product.id,
+    productSlug,
+    companyId,
+    allowed: decision.allowed,
+    reason: decision.allowed ? null : decision.reason,
+  });
+  logger.info('license.check', {
+    userId: user.userId,
+    product: productSlug,
+    companyId,
+    allowed: decision.allowed,
+    reason: decision.allowed ? undefined : decision.reason,
+    durationMs: Math.round(performance.now() - started),
+  });
+  return { found: true, product, decision, validUntil, checkedAt: now };
 }
 
 export type MySoftwareRow = {

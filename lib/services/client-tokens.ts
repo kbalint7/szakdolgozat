@@ -2,7 +2,7 @@ import { and, desc, eq, isNull } from 'drizzle-orm';
 
 import { db } from '@/db/drizzle';
 import { clientTokens } from '@/db/schema';
-import { generatePrefixedSecret } from '@/lib/crypto';
+import { generatePrefixedSecret, hashesEqual, parsePrefixedSecret, sha256 } from '@/lib/crypto';
 import { DomainError } from '@/lib/errors';
 
 import { audit } from './audit';
@@ -58,4 +58,18 @@ export async function revokeClientToken(userId: string, tokenId: string) {
       data: { prefix: token.prefix },
     });
   });
+}
+
+export async function authenticateClientToken(token: string): Promise<{ id: string; userId: string } | null> {
+  const parsed = parsePrefixedSecret(CLIENT_TOKEN_KIND, token);
+  if (!parsed) return null;
+  const candidates = await db
+    .select({ id: clientTokens.id, userId: clientTokens.userId, tokenHash: clientTokens.tokenHash })
+    .from(clientTokens)
+    .where(and(eq(clientTokens.prefix, parsed.prefix), isNull(clientTokens.revokedAt)));
+  const hash = sha256(token);
+  const match = candidates.find(candidate => hashesEqual(candidate.tokenHash, hash));
+  if (!match) return null;
+  await db.update(clientTokens).set({ lastUsedAt: new Date() }).where(eq(clientTokens.id, match.id));
+  return { id: match.id, userId: match.userId };
 }
