@@ -6,6 +6,7 @@ x-app-env: &app-env
   BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
   APP_URL: ${APP_URL:-http://localhost:3000}
   LOG_LEVEL: ${LOG_LEVEL:-info}
+  HR_FAULT_INJECTION: ${HR_FAULT_INJECTION:-0}
 
 services:
   db:
@@ -35,6 +36,8 @@ services:
     environment: *app-env
     ports:
       - '${APP_PORT:-3000}:3000'
+    volumes:
+      - ./tools:/app/tools
     healthcheck:
       test: ['CMD-SHELL', 'wget -q -O /dev/null http://127.0.0.1:3000/ || exit 1']
       interval: 10s

@@ -88,6 +88,7 @@ export type ProcessResult =
 
 export type ProcessOptions = {
   now?: Date;
+  injectFault?: (event: HrEvent) => boolean;
 };
 
 class PermanentFailure extends DomainError {}
@@ -98,6 +99,10 @@ function actorOf(event: HrEvent): Actor {
   return { type: 'system' };
 }
 
+function envFaultInjection(event: HrEvent): boolean {
+  return process.env.HR_FAULT_INJECTION === '1' && event.eventId.startsWith('fault-') && event.attempts === 0;
+}
+
 const employeeAuditActions = {
   'employee.hired': 'employee.hired',
   'employee.role_changed': 'employee.role_changed',
@@ -106,6 +111,7 @@ const employeeAuditActions = {
 
 export async function processEvent(id: string, options: ProcessOptions = {}): Promise<ProcessResult> {
   const now = options.now ?? new Date();
+  const injectFault = options.injectFault ?? envFaultInjection;
   let event: HrEvent | undefined;
   try {
     return await db.transaction(async tx => {
@@ -120,6 +126,7 @@ export async function processEvent(id: string, options: ProcessOptions = {}): Pr
       if (!company || company.deletedAt) throw new PermanentFailure('COMPANY_DELETED', 'The company was deleted.');
 
       const result = await applyEvent(tx, event, now);
+      if (injectFault(event)) throw new Error('Injected fault after allocation (S11)');
 
       await tx
         .update(hrEvents)

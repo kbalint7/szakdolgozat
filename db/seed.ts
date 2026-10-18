@@ -1,6 +1,8 @@
 import '../scripts/load-env';
 
 import { randomUUID } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
 
 import { hashPassword } from 'better-auth/crypto';
 import { and, eq } from 'drizzle-orm';
@@ -8,7 +10,6 @@ import { and, eq } from 'drizzle-orm';
 import { db, pool } from '@/db/drizzle';
 import {
   accounts,
-  apiKeys,
   companies,
   employees,
   entitlementRules,
@@ -19,7 +20,7 @@ import {
   users,
 } from '@/db/schema';
 import { audit, type Actor } from '@/lib/services/audit';
-import { createApiKey } from '@/lib/services/api-keys';
+import { authenticateApiKey, createApiKey } from '@/lib/services/api-keys';
 import { createProduct, createPlan, setProductPublished } from '@/lib/services/catalog';
 import { createCompany } from '@/lib/services/companies';
 import { ingestEvent, processEvent } from '@/lib/services/hr-events';
@@ -141,16 +142,6 @@ async function ensureRule(actor: Actor & { type: 'user' }, companyId: string, jo
   if (!existing) await createRule(actor, companyId, { jobRole, productId: product!.id });
 }
 
-async function ensureApiKey(actor: Actor & { type: 'user' }, companyId: string, name: string) {
-  const existing = await db.query.apiKeys.findFirst({
-    where: and(eq(apiKeys.companyId, companyId), eq(apiKeys.name, name)),
-  });
-  if (existing) return existing.id;
-  const created = await createApiKey(actor, companyId, { name, scopes: ['hr:events:write', 'hr:events:read'] });
-  log(`API key ${name}`);
-  return created.id;
-}
-
 type SeedEmployee = { hrId: string; name: string; jobRole: string; email?: string };
 
 async function hire(companyId: string, apiKeyId: string, list: SeedEmployee[], startIso: string) {
@@ -217,6 +208,18 @@ const masik: SeedEmployee[] = [
   { hrId: 'M-003', name: 'Hajdú Imre', jobRole: 'developer' },
 ];
 
+const TOOLS_ENV = path.join(process.cwd(), 'tools', '.env.local');
+
+function readToolsEnv(): Record<string, string> {
+  if (!existsSync(TOOLS_ENV)) return {};
+  return Object.fromEntries(
+    readFileSync(TOOLS_ENV, 'utf8')
+      .split(/\r?\n/)
+      .filter(line => line.includes('=') && !line.startsWith('#'))
+      .map(line => [line.slice(0, line.indexOf('=')), line.slice(line.indexOf('=') + 1)]),
+  );
+}
+
 async function main() {
   const admin = await ensureUser({
     email: 'admin@licenckezelo.test',
@@ -257,8 +260,18 @@ async function main() {
   await ensureRule(ownerActor, company.id, 'developer', 'ide-pro');
   await ensureLicense(ownerActor, company.id, 'ide-pro', 'Részleg – 20 hely, 12 hónap');
 
-  const apiKeyId = await ensureApiKey(ownerActor, company.id, 'HR-rendszer');
-  await hire(company.id, apiKeyId, pelda, '2026-09-01T07:00:00Z');
+  const env = readToolsEnv();
+  let apiKey = env.LM_API_KEY ? await authenticateApiKey(env.LM_API_KEY) : null;
+  if (!apiKey || apiKey.companyId !== company.id) {
+    const created = await createApiKey(ownerActor, company.id, {
+      name: 'HR-szimulátor (seed)',
+      scopes: ['hr:events:write', 'hr:events:read'],
+    });
+    env.LM_API_KEY = created.token;
+    apiKey = { id: created.id, companyId: company.id, scopes: [] };
+    log('API key for the HR simulator');
+  }
+  await hire(company.id, apiKey.id, pelda, '2026-09-01T07:00:00Z');
 
   const annaEmployee = await db.query.employees.findFirst({
     where: and(eq(employees.companyId, company.id), eq(employees.hrId, 'E-1001')),
@@ -284,9 +297,29 @@ async function main() {
   const otherActor = { type: 'user' as const, id: otherOwner.id };
   await ensureRule(otherActor, other.id, 'designer', 'office-suite');
   await ensureLicense(otherActor, other.id, 'office-suite', 'Alap – 10 hely, 12 hónap');
-  const otherApiKeyId = await ensureApiKey(otherActor, other.id, 'HR-rendszer');
-  await hire(other.id, otherApiKeyId, masik, '2026-09-01T07:00:00Z');
+  if (!env.LM_OTHER_API_KEY || (await authenticateApiKey(env.LM_OTHER_API_KEY))?.companyId !== other.id) {
+    env.LM_OTHER_API_KEY = (
+      await createApiKey(otherActor, other.id, {
+        name: 'Másik HR (seed)',
+        scopes: ['hr:events:write', 'hr:events:read'],
+      })
+    ).token;
+  }
+  const otherKey = (await authenticateApiKey(env.LM_OTHER_API_KEY))!;
+  await hire(other.id, otherKey.id, masik, '2026-09-01T07:00:00Z');
 
+  mkdirSync(path.dirname(TOOLS_ENV), { recursive: true });
+  writeFileSync(
+    TOOLS_ENV,
+    [
+      '# Written by `pnpm db:seed`. Not committed: contains real tokens of the local demo database.',
+      `LM_BASE_URL=${env.LM_BASE_URL ?? process.env.APP_URL ?? 'http://localhost:3000'}`,
+      `LM_API_KEY=${env.LM_API_KEY}`,
+      `LM_OTHER_API_KEY=${env.LM_OTHER_API_KEY}`,
+      '',
+    ].join('\n'),
+  );
+  log(`tokens written to ${path.relative(process.cwd(), TOOLS_ENV)}`);
   log('done');
 }
 
