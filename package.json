@@ -16,7 +16,8 @@
     "db:mig": "tsx db/migrate.ts",
     "db:seed": "tsx db/seed.ts",
     "db:studio": "drizzle-kit studio",
-    "hr-sim": "tsx tools/hr-sim/index.ts"
+    "hr-sim": "tsx tools/hr-sim/index.ts",
+    "demo-client": "tsx tools/demo-client/index.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

@@ -22,6 +22,7 @@ import {
 import { audit, type Actor } from '@/lib/services/audit';
 import { authenticateApiKey, createApiKey } from '@/lib/services/api-keys';
 import { createProduct, createPlan, setProductPublished } from '@/lib/services/catalog';
+import { authenticateClientToken, createClientToken } from '@/lib/services/client-tokens';
 import { createCompany } from '@/lib/services/companies';
 import { ingestEvent, processEvent } from '@/lib/services/hr-events';
 import { acceptInvitation, regenerateInvitationLink } from '@/lib/services/invitations';
@@ -288,6 +289,14 @@ async function main() {
     }
   }
 
+  if (!env.LM_CLIENT_TOKEN || !(await authenticateClientToken(env.LM_CLIENT_TOKEN))) {
+    env.LM_CLIENT_TOKEN = (await createClientToken(anna.id, 'Demó kliens (seed)')).token;
+    log('client token for anna.kiss@pelda.test');
+  }
+  if (!env.LM_ADMIN_CLIENT_TOKEN || !(await authenticateClientToken(env.LM_ADMIN_CLIENT_TOKEN))) {
+    env.LM_ADMIN_CLIENT_TOKEN = (await createClientToken(peldaAdmin.id, 'Admin kliens (seed)')).token;
+  }
+
   const otherOwner = await ensureUser({
     email: 'tulajdonos@masik.test',
     name: 'Másik Tulajdonos',
@@ -316,6 +325,8 @@ async function main() {
       `LM_BASE_URL=${env.LM_BASE_URL ?? process.env.APP_URL ?? 'http://localhost:3000'}`,
       `LM_API_KEY=${env.LM_API_KEY}`,
       `LM_OTHER_API_KEY=${env.LM_OTHER_API_KEY}`,
+      `LM_CLIENT_TOKEN=${env.LM_CLIENT_TOKEN}`,
+      `LM_ADMIN_CLIENT_TOKEN=${env.LM_ADMIN_CLIENT_TOKEN}`,
       '',
     ].join('\n'),
   );
