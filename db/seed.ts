@@ -317,6 +317,10 @@ async function main() {
   const otherKey = (await authenticateApiKey(env.LM_OTHER_API_KEY))!;
   await hire(other.id, otherKey.id, masik, '2026-09-01T07:00:00Z');
 
+  if (process.env.SEED_WRITE_TOOLS_ENV === '0') {
+    log('done (tools/.env.local not written)');
+    return;
+  }
   mkdirSync(path.dirname(TOOLS_ENV), { recursive: true });
   writeFileSync(
     TOOLS_ENV,

@@ -29,7 +29,7 @@ export const auth = betterAuth({
     cookieCache: { enabled: false },
   },
   rateLimit: {
-    enabled: true,
+    enabled: process.env.AUTH_RATE_LIMIT !== 'off',
     window: 60,
     max: 100,
     customRules: {
