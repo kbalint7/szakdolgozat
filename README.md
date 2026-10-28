@@ -54,6 +54,41 @@ licenceket.
 3. A helyeket a rendszer a cég szabályai szerint azonnal kiosztja. Ezt a **Licencek és helyek**, a
    **Munkavállalók** és az **Audit napló** oldalon követheted.
 
+## API
+
+| Végpont | Hitelesítés | Feladat |
+| --- | --- | --- |
+| `POST /api/v1/hr/events` | céges API-kulcs (`hr:events:write`) | HR-esemény: belépés, munkakörváltás, kilépés |
+| `GET /api/v1/hr/events/{eventId}` | céges API-kulcs (`hr:events:read`) | egy esemény feldolgozási állapota |
+| `POST /api/v1/hr/snapshot` | céges API-kulcs (`hr:events:write`) | a teljes aktív létszám; az eltérésekből események lesznek |
+| `POST /api/v1/license/check` | személyes kliens token | használhatja-e a felhasználó a terméket |
+
+```bash
+curl -X POST http://localhost:3000/api/v1/license/check \
+  -H "Authorization: Bearer $LM_CLIENT_TOKEN" -H 'Content-Type: application/json' \
+  -d '{"product":"ide-pro"}'
+```
+
+API-kulcsot a cég **API-kulcsok** oldalán, kliens tokent a **Kliens tokenek** oldalon lehet létrehozni.
+
+## Mintaprogramok
+
+A két mintaprogram (HR-szimulátor és demó kliens) csak a fenti API-n keresztül kommunikál, mint egy valódi HR-rendszer
+és egy szoftvergyártói kliens. Futtatásukhoz Node.js és pnpm kell (lásd [Fejlesztés](#fejlesztés)), és egyszer a
+`pnpm install`. A szükséges kulcsokat és tokeneket a `db:seed` írja a `tools/.env.local` fájlba (Dockerrel is).
+
+```bash
+pnpm demo-client check ide-pro                  # Kiss Anna egyszeri ellenőrzése: ENGEDÉLYEZVE
+pnpm demo-client watch ide-pro --interval 1s    # ellenőrzés másodpercenként
+pnpm hr-sim terminate E-1001                    # Anna kilép → a következő ellenőrzés ELUTASÍTVA
+pnpm hr-sim hire E-1001 --role developer        # újra belép → ismét kap helyet, ha van szabad
+pnpm hr-sim scenario list                       # előre megírt forgatókönyvek
+pnpm latency --rounds 30                        # a visszavonás késleltetése (p50, p95, max)
+pnpm load-test --clients 20 --duration 15s      # az ellenőrző végpont terhelés alatt
+```
+
+Az S11 forgatókönyvhöz (hiba feldolgozás közben) a szerveren `HR_FAULT_INJECTION=1` kell.
+
 ## Fejlesztés
 
 Helyi fejlesztéshez Node.js 22 vagy újabb és pnpm kell (`corepack enable`). Az adatbázis ilyenkor is Dockerben fut:
@@ -67,3 +102,15 @@ pnpm db:seed
 pnpm dev      # http://localhost:3000
 pnpm worker   # külön terminálban: újrapróbálások, licenclejárat, egyeztetés
 ```
+
+### Tesztek
+
+```bash
+pnpm test:unit          # az üzleti logika egységtesztjei, adatbázis nélkül
+pnpm test:integration   # a szolgáltatások a licenckezelo_test adatbázison
+pnpm test:e2e           # Playwright: buildeli és a 3100-as porton elindítja az alkalmazást
+```
+
+Az integrációs és az end-to-end tesztekhez fut a `db` konténer, és a `.env`-ben szerepel a `TEST_DATABASE_URL`. A
+`licenckezelo_test` adatbázist a konténer az első indításkor létrehozza; ha az adatbázis-kötet ennél régebbi, előbb
+`docker compose down -v`. Az end-to-end tesztekhez egyszer kell a böngésző is: `pnpm exec playwright install chromium`.
