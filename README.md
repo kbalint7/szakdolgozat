@@ -52,7 +52,7 @@ licenceket.
 2. Válassz egy csomagot, és vásárold meg a cégnek (a fizetés szimulált). Vásárláskor a licencet rögtön aktiválhatod,
    vagy a kapott licenckulcsot később a cég **Licencek és helyek** oldalán.
 3. A helyeket a rendszer a cég szabályai szerint azonnal kiosztja. Ezt a **Licencek és helyek**, a
-   **Munkavállalók** és az **Audit napló** oldalon követheted.
+   **Munkavállalók** és az **Auditnapló** oldalon követheted.
 
 ## API
 
@@ -69,7 +69,7 @@ curl -X POST http://localhost:3000/api/v1/license/check \
   -d '{"product":"ide-pro"}'
 ```
 
-API-kulcsot a cég **API-kulcsok** oldalán, kliens tokent a **Kliens tokenek** oldalon lehet létrehozni.
+API-kulcsot a cég **API-kulcsok** oldalán, kliens tokent a **Klienstokenek** oldalon lehet létrehozni.
 
 ## Mintaprogramok
 
