@@ -5,7 +5,7 @@ export function Logo({ href = '/', compact = false }: { href?: string; compact?:
   return (
     <Link
       href={href}
-      className="flex items-center gap-2 rounded-md font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="flex items-center gap-2 rounded-md font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring"
       aria-label="Licenckezelő"
     >
       <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">

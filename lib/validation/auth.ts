@@ -6,7 +6,7 @@ export const PASSWORD_MAX_LENGTH = 128;
 export const passwordSchema = z
   .string({ error: 'Add meg a jelszót.' })
   .min(PASSWORD_MIN_LENGTH, `A jelszónak legalább ${PASSWORD_MIN_LENGTH} karakterből kell állnia.`)
-  .max(PASSWORD_MAX_LENGTH, `A jelszó legfeljebb ${PASSWORD_MAX_LENGTH} karakter lehet.`)
+  .max(PASSWORD_MAX_LENGTH, `A jelszó legfeljebb ${PASSWORD_MAX_LENGTH} karakterből állhat.`)
   .regex(/\p{Ll}/u, 'A jelszónak tartalmaznia kell legalább egy kisbetűt.')
   .regex(/\p{Lu}/u, 'A jelszónak tartalmaznia kell legalább egy nagybetűt.')
   .regex(/\p{Nd}/u, 'A jelszónak tartalmaznia kell legalább egy számjegyet.');
@@ -15,6 +15,7 @@ export const emailSchema = z
   .string({ error: 'Add meg az e-mail-címet.' })
   .trim()
   .toLowerCase()
+  .min(1, 'Add meg az e-mail-címet.')
   .pipe(z.email({ error: 'Érvénytelen e-mail-cím.' }).max(254, 'Az e-mail-cím túl hosszú.'));
 
 const nameSchema = (label: string) =>
@@ -22,7 +23,7 @@ const nameSchema = (label: string) =>
     .string({ error: `Add meg a ${label}.` })
     .trim()
     .min(1, `Add meg a ${label}.`)
-    .max(100, `A ${label} legfeljebb 100 karakter lehet.`);
+    .max(100, 'Legfeljebb 100 karakter.');
 
 export const signUpSchema = z.object({
   lastName: nameSchema('vezetéknevet'),

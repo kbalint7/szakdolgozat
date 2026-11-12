@@ -6,21 +6,19 @@ import { PageHeader } from '@/components/page-header';
 import { loadAuditPage } from '@/lib/audit-page';
 import { requirePlatformAdmin } from '@/lib/auth/session';
 
-export const metadata: Metadata = { title: 'Globális audit napló' };
+export const metadata: Metadata = { title: 'Auditnapló' };
 
 export default async function GlobalAuditPage({ searchParams }: PageProps<'/admin/audit'>) {
   await requirePlatformAdmin();
-  const { filter, entries, olderHref } = await loadAuditPage(null, await searchParams, '/admin/audit');
+  const { filter, filtered, entries, more } = await loadAuditPage(null, await searchParams, '/admin/audit');
 
   return (
     <>
-      <PageHeader
-        eyebrow="Platform admin"
-        title="Globális audit napló"
-        description="Az összes cég és a platform minden változása: ki hajtotta végre, és mi váltotta ki."
-      />
-      <AuditFilters values={filter} resetHref="/admin/audit" />
-      <AuditTable entries={entries} showCompany olderHref={olderHref} />
+      <PageHeader title="Auditnapló" description="Ki mit változtatott és miért, az összes cégben és a platformon." />
+      <div className="flex flex-col gap-4">
+        <AuditFilters values={filter} resetHref="/admin/audit" search="company" />
+        <AuditTable entries={entries} filtered={filtered} showCompany more={more} />
+      </div>
     </>
   );
 }

@@ -86,7 +86,7 @@ const scenarios: Record<string, { title: string; run: () => Promise<void> }> = {
     },
   },
   s3: {
-    title: 'S3: kilép E-1005 → visszavonás, E-1026 megkapja a felszabadult helyet',
+    title: 'S3: kilép E-1005 → elveszti a helyét, E-1026 megkapja',
     run: async () => {
       await send(buildEvent('employee.terminated', 'E-1005', {}));
     },
@@ -107,7 +107,7 @@ const scenarios: Record<string, { title: string; run: () => Promise<void> }> = {
       await send(buildEvent('employee.terminated', hrId, { occurredAt: minutesAgo(10) }), 'kilépés (T3)');
       await send(
         buildEvent('employee.hired', hrId, { role: 'developer', occurredAt: minutesAgo(20) }),
-        'késő belépés (T2)',
+        'késve érkező belépés (T2)',
       );
     },
   },
@@ -213,7 +213,7 @@ async function main() {
       break;
     case 'replay': {
       const event = loadHistory()[args[0] ?? ''];
-      if (!event) throw new Error(`replay: nincs ilyen elküldött esemény: ${args[0]}`);
+      if (!event) throw new Error(`replay: ilyen eseményt még nem küldtél (${args[0]})`);
       await send(event, `újraküldés ${event.eventId}`);
       break;
     }
@@ -222,7 +222,7 @@ async function main() {
       await printStatus(args[0], 0);
       break;
     case 'snapshot': {
-      if (!args[0]) throw new Error('snapshot: add meg a JSON fájlt (az összes aktív munkavállaló listája)');
+      if (!args[0]) throw new Error('snapshot: add meg a JSON-fájlt (az összes aktív munkavállaló listája)');
       const employees = JSON.parse(readFileSync(args[0], 'utf8'));
       const result = await request('POST', '/api/v1/hr/snapshot', apiKey, {
         snapshotId: options.eventId ?? newEventId('snapshot'),

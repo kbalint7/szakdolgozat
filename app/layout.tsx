@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     default: 'Licenckezelő',
     template: '%s | Licenckezelő',
   },
-  description: 'Vállalati szoftverlicencek szabályalapú kezelése.',
+  description: 'Vállalati szoftverlicencek, kézi kiosztás nélkül.',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
@@ -34,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="flex min-h-full flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <TooltipProvider>{children}</TooltipProvider>
-          <Toaster richColors position="top-center" containerAriaLabel="Értesítések" />
+          <Toaster position="bottom-right" containerAriaLabel="Értesítések" />
         </ThemeProvider>
       </body>
     </html>

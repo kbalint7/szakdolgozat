@@ -16,7 +16,7 @@ export function ProfileForm({ name, email }: { name: string; email: string }) {
   useActionFeedback(state);
 
   return (
-    <form action={formAction} className="max-w-xl">
+    <form action={formAction}>
       <FieldGroup>
         {state.status === 'error' && <FormMessage status="error" message={state.message} />}
         <TextField
@@ -27,7 +27,14 @@ export function ProfileForm({ name, email }: { name: string; email: string }) {
           errors={state.fieldErrors?.name}
           required
         />
-        <TextField name="email" label="E-mail-cím" value={email} disabled readOnly />
+        <TextField
+          name="email"
+          label="E-mail-cím"
+          value={email}
+          description="Az e-mail-címeddel jelentkezel be, ezért nem módosítható."
+          disabled
+          readOnly
+        />
         <div>
           <SubmitButton>Mentés</SubmitButton>
         </div>

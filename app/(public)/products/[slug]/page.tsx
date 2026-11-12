@@ -1,16 +1,23 @@
-import { ArrowLeftIcon, CheckIcon, PackageIcon } from 'lucide-react';
+import { cn } from 'cn';
+import { PackageIcon } from 'lucide-react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 
-import { Callout } from '@/components/callout';
+import { EmptyState } from '@/components/empty-state';
 import { LinkButton } from '@/components/link-button';
-import { SkeletonCallout, SkeletonLine, SkeletonPage, SkeletonTileGrid } from '@/components/page-skeleton';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@/components/page-header';
+import {
+  SkeletonButton,
+  SkeletonPage,
+  SkeletonPageHeader,
+  SkeletonSection,
+  SkeletonText,
+} from '@/components/page-skeleton';
+import { Section } from '@/components/section';
 import { getCatalogProduct } from '@/lib/data/catalog';
-import { formatDuration, formatHuf, formatSeats } from '@/lib/format';
+import { formatDuration, formatHuf, formatNumber } from '@/lib/format';
 
 export async function generateMetadata({ params }: PageProps<'/products/[slug]'>): Promise<Metadata> {
   const { slug } = await params;
@@ -19,111 +26,149 @@ export async function generateMetadata({ params }: PageProps<'/products/[slug]'>
   return { title: product?.name ?? 'Termék', description: product?.summary };
 }
 
+const planGrid = 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3';
+const planCard = 'flex flex-col rounded-xl bg-card p-6 shadow-card ring-1 ring-border';
+
+function seatPrice(plan: { priceHuf: number; seatCount: number }) {
+  return Math.round(plan.priceHuf / plan.seatCount);
+}
+
+function Fact({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 py-2">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="nums font-medium">{children}</dd>
+    </div>
+  );
+}
+
 async function ProductDetail({ params }: { params: PageProps<'/products/[slug]'>['params'] }) {
   const { slug } = await params;
   await connection();
   const product = await getCatalogProduct(slug);
   if (!product) notFound();
 
+  const bestPlan = product.plans.reduce<(typeof product.plans)[number] | null>(
+    (best, plan) => (best === null || seatPrice(plan) < seatPrice(best) ? plan : best),
+    null,
+  );
+  const comparable = product.plans.length > 1;
+
   return (
     <>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <PackageIcon className="size-6" />
-        </span>
-        <div className="space-y-2">
-          <div className="font-mono text-xs text-muted-foreground">{product.slug}</div>
-          <h1 className="text-3xl font-semibold tracking-tight">{product.name}</h1>
-          {product.summary && <p className="text-lg text-pretty text-muted-foreground">{product.summary}</p>}
-        </div>
-      </div>
+      <PageHeader
+        trail={[{ href: '/products', label: 'Termékek' }]}
+        title={product.name}
+        description={product.summary || undefined}
+      />
+
       {product.description && (
-        <p className="max-w-3xl text-pretty whitespace-pre-line text-muted-foreground">{product.description}</p>
+        <p className="-mt-2 max-w-[68ch] text-[15px]/relaxed text-pretty whitespace-pre-line">{product.description}</p>
       )}
 
-      <section className="flex flex-col gap-4">
-        <div className="space-y-1">
-          <h2 className="text-xl font-semibold tracking-tight">Csomagok</h2>
-          <p className="text-sm text-muted-foreground">
-            Egyszeri díj. A helyek a cég dolgozói között a szabályok alapján automatikusan oszlanak el.
-          </p>
-        </div>
+      <Section
+        title="Csomagok"
+        description={
+          product.plans.length > 0 &&
+          'Egyszer kell fizetni, és a licenckulcsot azonnal megkapod. Vásárolni a cég tulajdonosa vagy adminisztrátora tud.'
+        }
+      >
         {product.plans.length === 0 ? (
-          <p className="text-muted-foreground">Ehhez a termékhez jelenleg nincs vásárolható csomag.</p>
+          <EmptyState
+            compact
+            icon={<PackageIcon />}
+            title="Ehhez a termékhez jelenleg nincs vásárolható csomag"
+            description="Nézz vissza később."
+          />
         ) : (
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {product.plans.map(plan => (
-              <li
-                key={plan.id}
-                className="flex flex-col gap-4 rounded-xl bg-card p-5 shadow-card ring-1 ring-foreground/8"
-              >
-                <div className="space-y-1">
-                  <h3 className="font-medium">{plan.name}</h3>
-                  <div className="text-sm text-muted-foreground">
-                    {formatSeats(plan.seatCount)} · {formatDuration(plan.durationDays)}
+          <ul className={planGrid}>
+            {product.plans.map(plan => {
+              const best = plan.id === bestPlan?.id;
+              return (
+                <li key={plan.id} className={cn(planCard, best && comparable && 'ring-primary/40')}>
+                  <div className="flex h-5 items-baseline justify-between gap-3">
+                    <h3 className="text-sm font-medium">{plan.name}</h3>
+                    {best && comparable && (
+                      <span className="text-[13px]/5 text-muted-foreground">Itt a legolcsóbb egy hely</span>
+                    )}
                   </div>
-                </div>
-                <div className="nums text-3xl font-semibold tracking-tight">{formatHuf(plan.priceHuf)}</div>
-                <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
-                  {[
-                    `${formatSeats(plan.seatCount)} a cégednek`,
-                    plan.durationDays === null ? 'Nem jár le' : `Érvényes ${formatDuration(plan.durationDays)}`,
-                    'A licenckulcsot azonnal megkapod',
-                  ].map(item => (
-                    <li key={item} className="flex items-start gap-2">
-                      <CheckIcon className="mt-0.5 size-4 shrink-0 text-success" aria-hidden /> {item}
-                    </li>
-                  ))}
-                </ul>
-                <LinkButton href={`/dashboard/purchase/${plan.id}`} className="mt-auto w-full">
-                  Vásárlás
-                </LinkButton>
-              </li>
-            ))}
+                  <div className="nums mt-2 text-3xl font-semibold tracking-tight">{formatHuf(plan.priceHuf)}</div>
+                  <dl className="mt-5 divide-y divide-border/70 border-y border-border/70 text-sm">
+                    <Fact label="Helyek">{formatNumber(plan.seatCount)}</Fact>
+                    <Fact label="Időtartam">{formatDuration(plan.durationDays)}</Fact>
+                    <Fact label="Egy hely ára">{formatHuf(seatPrice(plan))}</Fact>
+                  </dl>
+                  <LinkButton
+                    href={`/dashboard/purchase/${plan.id}`}
+                    variant={best ? 'default' : 'outline'}
+                    className="mt-6 w-full"
+                  >
+                    Vásárlás
+                  </LinkButton>
+                </li>
+              );
+            })}
           </ul>
         )}
-        <Callout tone="info">
-          Vásárolni a cég tulajdonosa vagy adminisztrátora tud. A kapott licenckulcsot a cég licencoldalán aktiválod, és
-          a helyek azonnal rendelkezésre állnak.
-        </Callout>
-      </section>
+      </Section>
     </>
   );
 }
 
+const sampleFacts = [
+  ['Helyek', '20'],
+  ['Időtartam', '1 év'],
+  ['Egy hely ára', '27 000 Ft'],
+];
+
 function ProductDetailSkeleton() {
   return (
     <SkeletonPage>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <Skeleton className="size-12 shrink-0 rounded-xl" />
-        <div className="space-y-2">
-          <SkeletonLine size="xs" w="w-16" />
-          <SkeletonLine size="3xl" w="w-48" />
-          <SkeletonLine size="lg" w="w-96" />
-        </div>
-      </div>
-      <SkeletonLine size="base" w="w-2xl" />
-      <section className="flex flex-col gap-4">
-        <div className="space-y-1">
-          <SkeletonLine size="xl" w="w-28" />
-          <SkeletonLine size="sm" w="w-2xl" />
-        </div>
-        <SkeletonTileGrid tile="plan" count={3} className="sm:grid-cols-2 lg:grid-cols-3" />
-        <SkeletonCallout title={false} lines={1} />
-      </section>
+      <SkeletonPageHeader
+        trail="‹ Termékek"
+        title="IDE Pro"
+        description="Professzionális fejlesztőkörnyezet csapatoknak."
+      />
+      <p className="-mt-2 max-w-[68ch] text-[15px]/relaxed text-pretty">
+        <SkeletonText>Kódszerkesztő, hibakereső és refaktoráló eszközök egy helyen, fejlesztőcsapatoknak.</SkeletonText>
+      </p>
+      <SkeletonSection
+        title="Csomagok"
+        description="Egyszer kell fizetni, és a licenckulcsot azonnal megkapod. Vásárolni a cég tulajdonosa vagy adminisztrátora tud."
+      >
+        <ul className={planGrid}>
+          {['Csapat', 'Részleg', 'Vállalat'].map(plan => (
+            <li key={plan} className={planCard}>
+              <div className="flex h-5 items-baseline justify-between gap-3">
+                <div className="text-sm font-medium">
+                  <SkeletonText>{plan}</SkeletonText>
+                </div>
+              </div>
+              <div className="mt-2 text-3xl font-semibold tracking-tight">
+                <SkeletonText>540 000 Ft</SkeletonText>
+              </div>
+              <div className="mt-5 divide-y divide-border/70 border-y border-border/70 text-sm">
+                {sampleFacts.map(([label, value]) => (
+                  <div key={label} className="flex items-baseline justify-between gap-4 py-2">
+                    <SkeletonText>{label}</SkeletonText>
+                    <span className="font-medium">
+                      <SkeletonText>{value}</SkeletonText>
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <SkeletonButton className="mt-6 w-full">Vásárlás</SkeletonButton>
+            </li>
+          ))}
+        </ul>
+      </SkeletonSection>
     </SkeletonPage>
   );
 }
 
 export default function ProductPage({ params }: PageProps<'/products/[slug]'>) {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <Link
-        href="/products"
-        className="flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeftIcon className="size-4" /> Vissza a termékekhez
-      </Link>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-4 py-10 sm:py-12">
       <Suspense fallback={<ProductDetailSkeleton />}>
         <ProductDetail params={params} />
       </Suspense>

@@ -13,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { BusyLabel } from '@/components/forms/busy-label';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -21,7 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Spinner } from '@/components/ui/spinner';
 import type { ActionState } from '@/lib/action-state';
 
 import { removeMemberAction, setMemberRoleAction, transferOwnershipAction } from '../../actions';
@@ -42,7 +42,13 @@ export function MemberActions({
   canRemove: boolean;
 }) {
   const [confirm, setConfirm] = useState<Pending>(null);
+  const [confirming, setConfirming] = useState(false);
   const [pending, startTransition] = useTransition();
+
+  function ask(question: NonNullable<Pending>) {
+    setConfirm(question);
+    setConfirming(true);
+  }
 
   const canPromote = canChangeRole && member.role === 'member';
   const canDemote = canChangeRole && member.role === 'admin';
@@ -53,7 +59,7 @@ export function MemberActions({
   function execute(run: () => Promise<ActionState>) {
     startTransition(async () => {
       const result = await run();
-      setConfirm(null);
+      setConfirming(false);
       if (result.status === 'error') toast.error(result.message);
       else if (result.message) toast.success(result.message);
     });
@@ -63,7 +69,14 @@ export function MemberActions({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger
-          render={<Button variant="ghost" size="icon-sm" aria-label={`Műveletek: ${member.name}`} />}
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="-my-1 -mr-1.5 text-muted-foreground"
+              aria-label={`Műveletek: ${member.name}`}
+            />
+          }
         >
           <MoreHorizontalIcon />
         </DropdownMenuTrigger>
@@ -79,13 +92,13 @@ export function MemberActions({
             <DropdownMenuItem
               onClick={() => execute(() => setMemberRoleAction(companyId, member.membershipId, 'member'))}
             >
-              Visszaminősítés taggá
+              Lefokozás taggá
             </DropdownMenuItem>
           )}
           {canTransfer && (
             <DropdownMenuItem
               onClick={() =>
-                setConfirm({
+                ask({
                   title: 'Átadod a tulajdonjogot?',
                   description: `${member.name} lesz a cég tulajdonosa, te pedig adminisztrátor leszel. Ezt csak az új tulajdonos tudja visszacsinálni.`,
                   confirmLabel: 'Tulajdonjog átadása',
@@ -102,9 +115,9 @@ export function MemberActions({
               <DropdownMenuItem
                 variant="destructive"
                 onClick={() =>
-                  setConfirm({
+                  ask({
                     title: 'Eltávolítod a tagot?',
-                    description: `${member.name} elveszíti a hozzáférését a céghez. Ha munkavállalóhoz volt kapcsolva, a kapcsolat megszűnik: a helye megmarad, de a szoftvert nem tudja használni, amíg újra össze nem kapcsoljátok.`,
+                    description: `${member.name} nem tud többé belépni a cég felületére. Ha munkavállaló is, a helye megmarad. A szoftvert viszont nem tudja használni, amíg újra össze nem kapcsolod egy fiókkal.`,
                     confirmLabel: 'Eltávolítás',
                     run: () => removeMemberAction(companyId, member.membershipId),
                   })
@@ -117,7 +130,7 @@ export function MemberActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <AlertDialog open={confirm !== null} onOpenChange={open => !open && setConfirm(null)}>
+      <AlertDialog open={confirming} onOpenChange={setConfirming}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{confirm?.title}</AlertDialogTitle>
@@ -125,9 +138,14 @@ export function MemberActions({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={pending}>Mégse</AlertDialogCancel>
-            <Button variant="destructive" disabled={pending} onClick={() => confirm && execute(confirm.run)}>
-              {pending && <Spinner />}
-              {confirm?.confirmLabel}
+            <Button
+              variant="destructive"
+              disabled={pending}
+              focusableWhenDisabled
+              aria-busy={pending || undefined}
+              onClick={() => confirm && execute(confirm.run)}
+            >
+              <BusyLabel busy={pending}>{confirm?.confirmLabel}</BusyLabel>
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

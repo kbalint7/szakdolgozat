@@ -27,7 +27,7 @@ test('UC-03: an invited user registers from the link and joins as a member', asy
   await expect(invitee.getByText('Tag', { exact: true }).first()).toBeVisible();
 
   await invitee.goto(invitationPath);
-  await expect(invitee.getByText('Ezt a meghívót már felhasználták.')).toBeVisible();
+  await expect(invitee.getByText('Ezt a meghívót már elfogadtad.')).toBeVisible();
 
   await page.reload();
   await expect(page.getByRole('row', { name: new RegExp(inviteeEmail) }).first()).toBeVisible();

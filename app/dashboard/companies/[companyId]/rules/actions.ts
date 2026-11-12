@@ -21,10 +21,19 @@ export async function createRuleAction(
     const { pool } = await createRule({ type: 'user', id: ctx.user.id }, companyId, parsed.data);
     const queued = pool.actions.filter(action => action.type === 'ENQUEUE').length;
     const granted = pool.actions.filter(action => action.type === 'ASSIGN').length;
-    message =
+    const outcome =
       queued === 0
-        ? 'A szabály létrejött. Jelenleg nincs ilyen munkakörű aktív munkavállaló.'
-        : `A szabály létrejött: ${queued} munkavállaló lett jogosult, ${granted} kapott helyet, ${queued - granted} várólistára került.`;
+        ? 'Jelenleg nincs ilyen munkakörű aktív munkavállaló.'
+        : queued === 1
+          ? granted === 1
+            ? 'Egy munkavállalónak jár a szoftver, és helyet is kapott.'
+            : 'Egy munkavállalónak jár a szoftver, de nem jutott neki hely, ezért várólistára került.'
+          : granted === queued
+            ? `${queued} munkavállalónak jár a szoftver, és mind helyet kapott.`
+            : granted === 0
+              ? `${queued} munkavállalónak jár a szoftver, de egyiküknek sem jutott hely, ezért várólistára kerültek.`
+              : `${queued} munkavállalónak jár a szoftver, közülük ${granted} kapott helyet, ${queued - granted} várólistára került.`;
+    message = `A szabályt létrehoztuk. ${outcome}`;
   } catch (error) {
     return failure(error, formData);
   }
@@ -39,7 +48,15 @@ export async function deleteRuleAction(companyId: string, ruleId: string): Promi
     const { pool } = await deleteRule(ctx.actor, companyId, ruleId);
     const revoked = pool.actions.filter(action => action.type === 'REVOKE').length;
     const cancelled = pool.actions.filter(action => action.type === 'CANCEL').length;
-    message = `A szabály törölve: ${revoked} hely visszavonva, ${cancelled} várólista-bejegyzés törölve.`;
+    const outcome =
+      revoked + cancelled === 0
+        ? 'Senki sem veszített el helyet.'
+        : cancelled === 0
+          ? `${revoked} munkavállaló elvesztette a helyét.`
+          : revoked === 0
+            ? `${cancelled} munkavállaló lekerült a várólistáról.`
+            : `${revoked} munkavállaló elvesztette a helyét, ${cancelled} lekerült a várólistáról.`;
+    message = `A szabályt töröltük. ${outcome}`;
   } catch (error) {
     return failure(error);
   }

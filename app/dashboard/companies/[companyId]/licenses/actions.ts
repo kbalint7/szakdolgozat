@@ -21,7 +21,11 @@ export async function activateKeyAction(
     const ctx = await authorizeCompanyAction(companyId, 'licenses.activate');
     const { license, pool } = await activateLicenseKey(ctx.actor, companyId, parsed.data.key);
     const granted = pool.actions.filter(action => action.type === 'ASSIGN').length;
-    message = `Licenc aktiválva: ${license.seatCount} hely. ${granted} munkavállaló kapott most helyet.`;
+    const activated = `Aktiváltuk a licencet, amely ${license.seatCount} helyre szól.`;
+    message =
+      granted === 0
+        ? `${activated} Most senki sem várt helyre.`
+        : `${activated} Most ${granted} munkavállaló kapott helyet.`;
   } catch (error) {
     return failure(error, formData);
   }
@@ -39,6 +43,8 @@ export async function reconcileAction(companyId: string): Promise<ActionState> {
   }
   refresh();
   return success(
-    changes === 0 ? 'Az állapot konzisztens, nem volt szükség változtatásra.' : `Újraszámolva: ${changes} változás.`,
+    changes === 0
+      ? 'Minden hely rendben van, nem kellett változtatni.'
+      : `Újraszámoltuk a helyeket, ${changes} változás történt.`,
   );
 }

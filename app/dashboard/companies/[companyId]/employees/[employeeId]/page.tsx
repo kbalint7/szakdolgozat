@@ -4,13 +4,12 @@ import { notFound } from 'next/navigation';
 
 import { AccessDenied } from '@/components/access-denied';
 import { Callout } from '@/components/callout';
-import { Mono } from '@/components/code';
-import { Detail, DetailList } from '@/components/detail-list';
+import { Ident } from '@/components/code';
+import { Detail, DetailAction, DetailList } from '@/components/detail-list';
 import { PageHeader } from '@/components/page-header';
 import { StatusBadge } from '@/components/status-badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getCompanyContext } from '@/lib/auth/company';
-import { formatTimestamp } from '@/lib/format';
 import { employeeStatusLabels } from '@/lib/i18n/labels';
 import { getEmployee, getEmployeeTimeline } from '@/lib/services/employees';
 import { listUnlinkedMembers } from '@/lib/services/invitations';
@@ -36,37 +35,37 @@ export default async function EmployeePage({
   if (!employee) notFound();
 
   const showAll = (await searchParams).all === '1';
+  const canManage = ctx.can('employees.manage');
   const [fullTimeline, jobRoles, candidates] = await Promise.all([
     getEmployeeTimeline(companyId, employee),
     listKnownJobRoles(companyId),
-    ctx.can('employees.manage') ? listUnlinkedMembers(companyId) : Promise.resolve([]),
+    canManage ? listUnlinkedMembers(companyId) : Promise.resolve([]),
   ]);
   const timeline = showAll ? fullTimeline : fullTimeline.slice(-TIMELINE_LIMIT);
   const hidden = fullTimeline.length - timeline.length;
-  const heldWithoutAccount = !employee.linkedUser && employee.seats.some(seat => seat.status === 'assigned');
+  const base = `/dashboard/companies/${companyId}`;
+  const linkedUser = employee.linkedUser;
+  const heldWithoutAccount = !linkedUser && employee.seats.some(seat => seat.status === 'assigned');
+  const accountDiffers = linkedUser && (linkedUser.email !== employee.email || linkedUser.name !== employee.name);
 
   return (
     <>
       <PageHeader
-        back={{ href: `/dashboard/companies/${companyId}/employees`, label: 'Munkavállalók' }}
-        eyebrow="Munkavállaló"
-        title={employee.name ?? employee.hrId}
-        description={<Mono>{employee.hrId}</Mono>}
+        trail={[
+          { href: base, label: ctx.company.name },
+          { href: `${base}/employees`, label: 'Munkavállalók' },
+        ]}
+        title={employee.name ?? 'Név nélkül'}
         meta={
           <>
             <StatusBadge tone={employee.status === 'active' ? 'success' : 'neutral'}>
               {employeeStatusLabels[employee.status]}
             </StatusBadge>
-            {employee.jobRole && <Mono>{employee.jobRole}</Mono>}
-            {employee.linkedUser ? (
-              <span className="text-xs text-muted-foreground">fiók: {employee.linkedUser.email}</span>
-            ) : (
-              <span className="text-xs text-muted-foreground">nincs fiókhoz kapcsolva</span>
-            )}
+            <Ident>{employee.hrId}</Ident>
           </>
         }
         actions={
-          ctx.can('employees.manage') && (
+          canManage && (
             <ManualEventDialog
               companyId={companyId}
               jobRoles={jobRoles}
@@ -81,86 +80,105 @@ export default async function EmployeePage({
       />
 
       {heldWithoutAccount && (
-        <Callout tone="warning" title="A hely le van foglalva, de nem használható">
-          A munkavállalónak van kiosztott helye, de amíg a fiókját nem kapcsoljátok össze a munkavállalói adataival, nem
-          tudja használni a szoftvert.
+        <Callout tone="warning" title="Van helye, de még nem tudja használni">
+          {candidates.length > 0
+            ? 'Kapcsold össze egy fiókkal, hogy használni tudja a szoftvert.'
+            : 'Még nincs fiókja a cégnél. Hívd meg a Tagok és meghívók oldalon, hogy használni tudja a szoftvert.'}
         </Callout>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
-        <div className="flex flex-col gap-6">
+      <div className="grid items-start gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
+        <div className="flex flex-col gap-4">
           <Card>
             <CardHeader>
               <CardTitle>Adatok</CardTitle>
             </CardHeader>
             <CardContent>
               <DetailList>
-                <Detail label="Munkakör">{employee.jobRole ? <Mono>{employee.jobRole}</Mono> : '–'}</Detail>
-                <Detail label="E-mail">{employee.email ?? '–'}</Detail>
-                <Detail label="Kapcsolt fiók">
-                  {employee.linkedUser ? `${employee.linkedUser.name} (${employee.linkedUser.email})` : 'nincs'}
-                </Detail>
-                <Detail label="Utolsó változás">{formatTimestamp(employee.stateAsOf)}</Detail>
-                <Detail label="Utolsó esemény">
-                  {employee.lastEventId ? <Mono>{employee.lastEventId}</Mono> : '–'}
-                </Detail>
+                <Detail label="Munkakör">{employee.jobRole || '–'}</Detail>
+                <Detail label="E-mail-cím a HR-rendszerben">{employee.email ?? '–'}</Detail>
               </DetailList>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
-              <CardTitle>Helyek</CardTitle>
-              <CardDescription>Szoftverenként egy hely vagy egy várólista-bejegyzés.</CardDescription>
+              <CardTitle>Szoftverek</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-2">
-              {employee.seats.length === 0 && <p className="text-sm text-muted-foreground">Nincs helye.</p>}
-              {employee.seats.map(seat => (
-                <div key={seat.productId} className="flex items-center justify-between gap-2 text-sm">
-                  <Link
-                    href={`/dashboard/companies/${companyId}/licenses/${seat.productId}`}
-                    className="font-medium hover:underline"
-                  >
-                    {seat.productName}
-                  </Link>
-                  {seat.status === 'assigned' ? (
-                    <StatusBadge tone="success">kiosztva</StatusBadge>
-                  ) : (
-                    <StatusBadge tone="warning">{seat.position}. a várólistán</StatusBadge>
-                  )}
-                </div>
-              ))}
+            <CardContent>
+              {employee.seats.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nincs helye, és várólistán sem áll.</p>
+              ) : (
+                <DetailList>
+                  {employee.seats.map(seat => (
+                    <Detail
+                      key={seat.productId}
+                      label={
+                        <Link
+                          href={`${base}/licenses/${seat.productId}`}
+                          className="rounded-sm hover:text-foreground hover:underline focus-visible:text-foreground"
+                        >
+                          {seat.productName}
+                        </Link>
+                      }
+                    >
+                      {seat.status === 'assigned' ? (
+                        <StatusBadge tone="success">Kiosztva</StatusBadge>
+                      ) : (
+                        <StatusBadge tone="warning">{seat.position}. a várólistán</StatusBadge>
+                      )}
+                    </Detail>
+                  ))}
+                </DetailList>
+              )}
             </CardContent>
           </Card>
-          {ctx.can('employees.manage') && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Felhasználói fiók</CardTitle>
-                <CardDescription>
-                  A szoftvert az a fiók használhatja, amelyet a munkavállalóhoz kapcsoltok.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <LinkControls
-                  companyId={companyId}
-                  employeeId={employee.id}
-                  linkedUser={employee.linkedUser}
-                  candidates={candidates}
-                />
-              </CardContent>
-            </Card>
-          )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Felhasználói fiók</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <DetailList>
+                <Detail label="Állapot">
+                  {linkedUser ? (
+                    <StatusBadge tone="success">Összekapcsolva</StatusBadge>
+                  ) : (
+                    <StatusBadge tone="neutral">Nincs összekapcsolva</StatusBadge>
+                  )}
+                </Detail>
+                {linkedUser && accountDiffers && (
+                  <Detail label="Fiók">
+                    {linkedUser.name}
+                    <div className="text-[13px] wrap-anywhere text-muted-foreground">{linkedUser.email}</div>
+                  </Detail>
+                )}
+              </DetailList>
+              {canManage && (
+                <DetailAction>
+                  <LinkControls
+                    companyId={companyId}
+                    employeeId={employee.id}
+                    linkedUser={linkedUser}
+                    candidates={candidates}
+                    hasSeat={employee.seats.some(seat => seat.status === 'assigned')}
+                  />
+                </DetailAction>
+              )}
+            </CardContent>
+          </Card>
         </div>
+
         <Card>
           <CardHeader>
             <CardTitle>Idővonal</CardTitle>
-            <CardDescription>Minden változás és döntés időrendben, az okával együtt.</CardDescription>
           </CardHeader>
           <CardContent>
             {hidden > 0 && (
               <p className="mb-4 text-sm text-muted-foreground">
                 A legutóbbi {timeline.length} bejegyzés látszik.{' '}
                 <Link href="?all=1" className="font-medium text-foreground underline underline-offset-4">
-                  Mind a {fullTimeline.length} megjelenítése
+                  Az összes ({fullTimeline.length}) megjelenítése
                 </Link>
               </p>
             )}

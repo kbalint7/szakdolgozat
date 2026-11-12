@@ -1,158 +1,187 @@
-import { KeyRoundIcon, ReceiptIcon, WalletIcon } from 'lucide-react';
+import { ReceiptIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 
-import { Callout } from '@/components/callout';
-import { Mono } from '@/components/code';
+import { Ident } from '@/components/code';
 import { EmptyState } from '@/components/empty-state';
-import { ActionButton } from '@/components/forms/action-button';
+import { RowAction } from '@/components/forms/row-action';
+import { MetaLine } from '@/components/meta-line';
 import { PageHeader } from '@/components/page-header';
-import { Section } from '@/components/section';
-import { StatCard, StatGrid } from '@/components/stat-card';
 import { StatusBadge } from '@/components/status-badge';
-import { TableCard } from '@/components/table-card';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ActionHead, TableCard, TwoLine } from '@/components/table-card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { requirePlatformAdmin } from '@/lib/auth/session';
-import { formatDateTime, formatHuf, formatNumber } from '@/lib/format';
+import { formatDate, formatDateTime, formatHuf } from '@/lib/format';
 import { listAllOrders, listPlansForIssuing } from '@/lib/services/orders';
 
 import { revokeLicenseAction, revokeLicenseKeyAction } from './actions';
-import { IssueKeyForm } from './issue-key-form';
+import { IssueKeyDialog } from './issue-key-form';
 
 export const metadata: Metadata = { title: 'Rendelések' };
+
+const manualKey = 'Kézzel kiadott kulcs';
+
+type Order = Awaited<ReturnType<typeof listAllOrders>>[number];
+
+function KeyStatus({ order }: { order: Order }) {
+  if (order.licenseStatus === 'revoked' || order.keyStatus === 'revoked') {
+    return <StatusBadge tone="danger">Visszavonva</StatusBadge>;
+  }
+  if (order.keyStatus === 'unredeemed') return <StatusBadge tone="info">Aktiválható</StatusBadge>;
+  if (order.keyStatus === 'redeemed') {
+    return (
+      <StatusBadge tone="neutral" dot="hidden">
+        Aktiválva
+      </StatusBadge>
+    );
+  }
+  return null;
+}
+
+function Revoke({ order, className }: { order: Order; className?: string }) {
+  if (order.licenseId && order.licenseStatus === 'active') {
+    return (
+      <RowAction
+        destructive
+        className={className}
+        title="Licenc visszavonása"
+        action={revokeLicenseAction.bind(null, order.licenseId)}
+        confirm={{
+          title: 'Visszavonod a licencet?',
+          description:
+            'A cég elveszíti a licenc helyeit. Ha így nem jut mindenkinek hely, azok kerülnek vissza a várólistára, akik utoljára kaptak.',
+          confirmLabel: 'Visszavonás',
+          destructive: true,
+        }}
+      >
+        Visszavonás
+      </RowAction>
+    );
+  }
+  if (order.keyId && order.keyStatus === 'unredeemed') {
+    return (
+      <RowAction
+        destructive
+        className={className}
+        title="Kulcs visszavonása"
+        action={revokeLicenseKeyAction.bind(null, order.keyId)}
+        confirm={{
+          title: 'Visszavonod a kulcsot?',
+          description: 'Ezt a kulcsot ezután senki sem tudja aktiválni.',
+          confirmLabel: 'Visszavonás',
+          destructive: true,
+        }}
+      >
+        Visszavonás
+      </RowAction>
+    );
+  }
+  return null;
+}
 
 export default async function AdminOrdersPage() {
   await requirePlatformAdmin();
   const [orders, plans] = await Promise.all([listAllOrders(), listPlansForIssuing()]);
-  const revenue = orders.reduce((sum, order) => sum + order.priceHuf, 0);
-  const unredeemed = orders.filter(order => order.keyStatus === 'unredeemed').length;
-  const manual = orders.filter(order => order.source === 'manual').length;
 
   return (
     <>
       <PageHeader
-        eyebrow="Platform admin"
-        title="Rendelések és licenckulcsok"
-        description="Minden vásárlás és kézzel kiadott kulcs, a kulcs és a licenc állapotával."
+        title="Rendelések"
+        description="Minden vásárlás és kézzel kiadott licenckulcs, a legfrissebb elöl."
+        actions={
+          <IssueKeyDialog
+            plans={plans.map(plan => ({
+              id: plan.id,
+              label: `${plan.productName} · ${plan.name}${plan.isActive ? '' : ' (inaktív)'}`,
+            }))}
+          />
+        }
       />
 
-      <StatGrid>
-        <StatCard label="Rendelések" value={formatNumber(orders.length)} icon={<ReceiptIcon />} tone="primary" />
-        <StatCard label="Bevétel" value={formatHuf(revenue)} icon={<WalletIcon />} />
-        <StatCard label="Aktiválható kulcsok" value={formatNumber(unredeemed)} icon={<KeyRoundIcon />} tone="info" />
-        <StatCard label="Kézi kulcsok" value={formatNumber(manual)} hint="offline értékesítés" />
-      </StatGrid>
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Licenckulcs kiadása kézzel</CardTitle>
-            <CardDescription>
-              Offline értékesítéshez: a kulcs a rendelések között „kézi” forrással jelenik meg, és bármelyik cég
-              aktiválhatja.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <IssueKeyForm
-              plans={plans.map(plan => ({
-                id: plan.id,
-                label: `${plan.productName} · ${plan.name}${plan.isActive ? '' : ' (inaktív)'}`,
-              }))}
-            />
-          </CardContent>
-        </Card>
-        <Callout tone="note" title="Kulcs és licenc" className="h-fit">
-          Egy kulcsot egyszer lehet aktiválni; utána már csak az utolsó négy karakterét látod. Aktiváláskor jön létre a
-          licenc, amivel a cég helyeket kap. Ha visszavonod a licencet, a helyek azonnal megszűnnek.
-        </Callout>
-      </div>
-
-      <Section title="Rendelések" description="Időrendben, a legfrissebb elöl.">
-        {orders.length === 0 ? (
-          <EmptyState icon={<ReceiptIcon />} title="Még nincs rendelés" />
-        ) : (
-          <TableCard>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Dátum</TableHead>
-                  <TableHead>Cég</TableHead>
-                  <TableHead>Termék és csomag</TableHead>
-                  <TableHead className="text-right">Ár</TableHead>
-                  <TableHead>Forrás</TableHead>
-                  <TableHead>Kulcs</TableHead>
-                  <TableHead className="w-0" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {orders.map(order => (
+      {orders.length === 0 ? (
+        <EmptyState
+          icon={<ReceiptIcon />}
+          title="Még nincs rendelés"
+          description="Itt jelenik meg minden vásárlás és minden kézzel kiadott kulcs."
+        />
+      ) : (
+        <TableCard>
+          <Table>
+            <TableHeader className="max-lg:hidden">
+              <TableRow>
+                <TableHead className="w-full lg:w-48 xl:w-52 min-[87.5rem]:w-56">Termék és csomag</TableHead>
+                <TableHead className="lg:w-44">Cég</TableHead>
+                <TableHead className="hidden xl:table-cell xl:w-44">Megrendelve</TableHead>
+                <TableHead className="hidden min-[87.5rem]:table-cell min-[87.5rem]:w-24">Kulcs</TableHead>
+                <TableHead className="lg:w-32">Állapot</TableHead>
+                <TableHead className="hidden text-right xl:table-cell xl:w-32">Ár</TableHead>
+                <ActionHead label="Műveletek" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orders.map(order => {
+                const company = order.companyName ?? order.redeemedCompanyName;
+                const manual = order.source === 'manual';
+                return (
                   <TableRow key={order.id}>
-                    <TableCell className="nums text-muted-foreground">{formatDateTime(order.createdAt)}</TableCell>
-                    <TableCell>{order.companyName ?? order.redeemedCompanyName ?? '–'}</TableCell>
-                    <TableCell>
-                      <span className="font-medium">{order.productName}</span> · {order.planName}
+                    <TableCell className="max-lg:whitespace-normal">
+                      <TwoLine
+                        title={
+                          <span className="flex items-center justify-between gap-3">
+                            <span className="min-w-0 truncate">{order.productName}</span>
+                            <span className="shrink-0 font-normal lg:hidden">
+                              <KeyStatus order={order} />
+                            </span>
+                          </span>
+                        }
+                        sub={
+                          <>
+                            <span className="block truncate max-lg:hidden">{order.planName}</span>
+                            <MetaLine
+                              className="lg:hidden"
+                              items={[
+                                order.planName,
+                                company ?? manualKey,
+                                formatHuf(order.priceHuf),
+                                formatDate(order.createdAt),
+                              ]}
+                            />
+                          </>
+                        }
+                      />
+                      <Revoke order={order} className="mt-1.5 mr-0 mb-0 -ml-2.5 lg:hidden" />
                     </TableCell>
-                    <TableCell className="nums text-right">{formatHuf(order.priceHuf)}</TableCell>
-                    <TableCell>
-                      {order.source === 'manual' ? (
-                        <Badge variant="outline">kézi</Badge>
+                    <TableCell className="hidden lg:table-cell">
+                      {company && manual ? (
+                        <TwoLine
+                          title={<span className="block truncate font-normal">{company}</span>}
+                          sub={manualKey}
+                        />
+                      ) : company ? (
+                        <span className="block truncate">{company}</span>
                       ) : (
-                        <Badge variant="secondary">vásárlás</Badge>
+                        <span className="text-muted-foreground">{manualKey}</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      <span className="flex flex-wrap items-center gap-2">
-                        <Mono>…{order.keyLast4}</Mono>
-                        {order.licenseStatus === 'revoked' || order.keyStatus === 'revoked' ? (
-                          <StatusBadge tone="danger">visszavonva</StatusBadge>
-                        ) : order.keyStatus === 'redeemed' ? (
-                          <StatusBadge tone="success">aktiválva</StatusBadge>
-                        ) : (
-                          <StatusBadge tone="info">aktiválható</StatusBadge>
-                        )}
-                      </span>
+                    <TableCell className="nums hidden text-muted-foreground xl:table-cell">
+                      {formatDateTime(order.createdAt)}
                     </TableCell>
-                    <TableCell className="text-right">
-                      {order.licenseId && order.licenseStatus === 'active' && (
-                        <ActionButton
-                          variant="ghost"
-                          size="sm"
-                          action={revokeLicenseAction.bind(null, order.licenseId)}
-                          confirm={{
-                            title: 'Visszavonod a licencet?',
-                            description:
-                              'A cég ennyivel kevesebb helyet kap; a legutóbb helyet kapottak visszakerülnek a várólistára.',
-                            confirmLabel: 'Visszavonás',
-                            destructive: true,
-                          }}
-                        >
-                          Licenc visszavonása
-                        </ActionButton>
-                      )}
-                      {order.keyId && order.keyStatus === 'unredeemed' && (
-                        <ActionButton
-                          variant="ghost"
-                          size="sm"
-                          action={revokeLicenseKeyAction.bind(null, order.keyId)}
-                          confirm={{
-                            title: 'Visszavonod a kulcsot?',
-                            description: 'A kulcs ezután nem aktiválható.',
-                            confirmLabel: 'Visszavonás',
-                            destructive: true,
-                          }}
-                        >
-                          Kulcs visszavonása
-                        </ActionButton>
-                      )}
+                    <TableCell className="hidden min-[87.5rem]:table-cell">
+                      {order.keyLast4 && <Ident title="A kulcs utolsó 4 karaktere">…{order.keyLast4}</Ident>}
+                    </TableCell>
+                    <TableCell className="max-lg:hidden">
+                      <KeyStatus order={order} />
+                    </TableCell>
+                    <TableCell className="nums hidden text-right xl:table-cell">{formatHuf(order.priceHuf)}</TableCell>
+                    <TableCell className="text-right max-lg:hidden">
+                      <Revoke order={order} />
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableCard>
-        )}
-      </Section>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableCard>
+      )}
     </>
   );
 }

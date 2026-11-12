@@ -51,7 +51,7 @@ describe('EMP-8 manual event form', () => {
   });
 
   it('requires the job role for hires and role changes', () => {
-    const required = { jobRole: ['Belépésnél és munkakörváltásnál kötelező.'] };
+    const required = { jobRole: ['Belépésnél és munkakörváltásnál meg kell adni.'] };
     expect(
       parse({ type: 'employee.hired', hrId: 'E-1042', name: '', email: '', jobRole: '', occurredAt }).errors,
     ).toEqual(required);

@@ -233,21 +233,21 @@ async function main() {
     slug: 'ide-pro',
     name: 'IDE Pro',
     summary: 'Professzionális fejlesztőkörnyezet csapatoknak.',
-    description: 'Kódszerkesztő, hibakereső és refaktoráló eszközök egy helyen. A fejlesztői munkakörökhöz.',
+    description: 'Kódszerkesztő, hibakereső és refaktoráló eszközök egy helyen, fejlesztőcsapatoknak.',
     plans: [
-      { name: 'Csapat – 5 hely, 12 hónap', seatCount: 5, durationDays: 365, priceHuf: 150_000 },
-      { name: 'Részleg – 20 hely, 12 hónap', seatCount: 20, durationDays: 365, priceHuf: 540_000 },
-      { name: 'Vállalat – 50 hely, határozatlan', seatCount: 50, durationDays: null, priceHuf: 2_900_000 },
+      { name: 'Csapat', seatCount: 5, durationDays: 365, priceHuf: 150_000 },
+      { name: 'Részleg', seatCount: 20, durationDays: 365, priceHuf: 540_000 },
+      { name: 'Vállalat', seatCount: 50, durationDays: null, priceHuf: 2_900_000 },
     ],
   });
   await ensureProduct(adminActor, {
     slug: 'office-suite',
     name: 'Office Suite',
-    summary: 'Irodai programcsomag: szövegszerkesztő, táblázatkezelő, bemutató.',
+    summary: 'Irodai programcsomag szövegszerkesztővel, táblázatkezelővel és bemutatókészítővel.',
     description: 'Az irodai munkakörök alapcsomagja.',
     plans: [
-      { name: 'Alap – 10 hely, 12 hónap', seatCount: 10, durationDays: 365, priceHuf: 90_000 },
-      { name: 'Bővített – 25 hely, 24 hónap', seatCount: 25, durationDays: 730, priceHuf: 380_000 },
+      { name: 'Alap', seatCount: 10, durationDays: 365, priceHuf: 90_000 },
+      { name: 'Bővített', seatCount: 25, durationDays: 730, priceHuf: 380_000 },
     ],
   });
 
@@ -259,13 +259,13 @@ async function main() {
   await ensureMembership(company.id, peldaAdmin.id, 'admin');
 
   await ensureRule(ownerActor, company.id, 'developer', 'ide-pro');
-  await ensureLicense(ownerActor, company.id, 'ide-pro', 'Részleg – 20 hely, 12 hónap');
+  await ensureLicense(ownerActor, company.id, 'ide-pro', 'Részleg');
 
   const env = readToolsEnv();
   let apiKey = env.LM_API_KEY ? await authenticateApiKey(env.LM_API_KEY) : null;
   if (!apiKey || apiKey.companyId !== company.id) {
     const created = await createApiKey(ownerActor, company.id, {
-      name: 'HR-szimulátor (seed)',
+      name: 'HR-szimulátor',
       scopes: ['hr:events:write', 'hr:events:read'],
     });
     env.LM_API_KEY = created.token;
@@ -290,11 +290,11 @@ async function main() {
   }
 
   if (!env.LM_CLIENT_TOKEN || !(await authenticateClientToken(env.LM_CLIENT_TOKEN))) {
-    env.LM_CLIENT_TOKEN = (await createClientToken(anna.id, 'Demó kliens (seed)')).token;
+    env.LM_CLIENT_TOKEN = (await createClientToken(anna.id, 'Demó kliens')).token;
     log('client token for anna.kiss@pelda.test');
   }
   if (!env.LM_ADMIN_CLIENT_TOKEN || !(await authenticateClientToken(env.LM_ADMIN_CLIENT_TOKEN))) {
-    env.LM_ADMIN_CLIENT_TOKEN = (await createClientToken(peldaAdmin.id, 'Admin kliens (seed)')).token;
+    env.LM_ADMIN_CLIENT_TOKEN = (await createClientToken(peldaAdmin.id, 'Admin kliens')).token;
   }
 
   const otherOwner = await ensureUser({
@@ -302,14 +302,14 @@ async function main() {
     name: 'Másik Tulajdonos',
     password: DEMO_PASSWORD,
   });
-  const other = await ensureCompany(otherOwner, 'Másik Zrt.', 'Második cég a bemutatóhoz.');
+  const other = await ensureCompany(otherOwner, 'Másik Zrt.', 'A bemutató második cége.');
   const otherActor = { type: 'user' as const, id: otherOwner.id };
   await ensureRule(otherActor, other.id, 'designer', 'office-suite');
-  await ensureLicense(otherActor, other.id, 'office-suite', 'Alap – 10 hely, 12 hónap');
+  await ensureLicense(otherActor, other.id, 'office-suite', 'Alap');
   if (!env.LM_OTHER_API_KEY || (await authenticateApiKey(env.LM_OTHER_API_KEY))?.companyId !== other.id) {
     env.LM_OTHER_API_KEY = (
       await createApiKey(otherActor, other.id, {
-        name: 'Másik HR (seed)',
+        name: 'Másik HR',
         scopes: ['hr:events:write', 'hr:events:read'],
       })
     ).token;

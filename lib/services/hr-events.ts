@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNotNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, isNotNull, lte, or, sql, type SQL } from 'drizzle-orm';
 
 import { db, type Tx } from '@/db/drizzle';
 import {
@@ -320,12 +320,30 @@ export async function retryEvent(actor: Actor, companyId: string, id: string) {
 
 export type InboxFilter = HrEventStatus | 'duplicate' | 'retrying' | undefined;
 
-export async function listHrEvents(companyId: string, filter: InboxFilter, limit = 100) {
-  const conditions = [eq(hrEvents.companyId, companyId)];
+const eventEmployee = and(eq(employees.companyId, hrEvents.companyId), eq(employees.hrId, hrEvents.hrId));
+
+function inboxConditions(companyId: string, search?: string): SQL[] {
+  const conditions: SQL[] = [eq(hrEvents.companyId, companyId)];
+  if (search) {
+    const pattern = `%${search.replace(/[\\%_]/g, char => `\\${char}`)}%`;
+    conditions.push(or(ilike(hrEvents.hrId, pattern), ilike(employees.name, pattern))!);
+  }
+  return conditions;
+}
+
+export async function listHrEvents(
+  companyId: string,
+  filter: InboxFilter,
+  limit = 100,
+  repeatedOnly = false,
+  search?: string,
+) {
+  const conditions = inboxConditions(companyId, search);
   if (filter === 'duplicate') conditions.push(sql`${hrEvents.duplicateCount} > 0`);
   else if (filter === 'retrying')
     conditions.push(and(eq(hrEvents.status, 'failed'), isNotNull(hrEvents.nextAttemptAt))!);
   else if (filter) conditions.push(eq(hrEvents.status, filter));
+  if (repeatedOnly) conditions.push(sql`${hrEvents.duplicateCount} > 0`);
 
   return db
     .select({
@@ -343,21 +361,40 @@ export async function listHrEvents(companyId: string, filter: InboxFilter, limit
       nextAttemptAt: hrEvents.nextAttemptAt,
       duplicateCount: hrEvents.duplicateCount,
       employeeId: employees.id,
+      employeeName: employees.name,
     })
     .from(hrEvents)
-    .leftJoin(employees, and(eq(employees.companyId, hrEvents.companyId), eq(employees.hrId, hrEvents.hrId)))
+    .leftJoin(employees, eventEmployee)
     .where(and(...conditions))
     .orderBy(desc(hrEvents.receivedAt))
     .limit(limit);
 }
 
-export async function countHrEventsByStatus(companyId: string) {
+export async function countHrEventsByStatus(companyId: string, search?: string) {
   const rows = await db
-    .select({ status: hrEvents.status, value: sql<number>`count(*)`.mapWith(Number) })
+    .select({
+      status: hrEvents.status,
+      value: sql<number>`count(*)`.mapWith(Number),
+      repeated: sql<number>`count(*) filter (where ${hrEvents.duplicateCount} > 0)`.mapWith(Number),
+      scheduled: sql<number>`count(*) filter (where ${hrEvents.nextAttemptAt} is not null)`.mapWith(Number),
+    })
     .from(hrEvents)
-    .where(eq(hrEvents.companyId, companyId))
+    .leftJoin(employees, eventEmployee)
+    .where(and(...inboxConditions(companyId, search)))
     .groupBy(hrEvents.status);
-  return Object.fromEntries(rows.map(row => [row.status, row.value])) as Partial<Record<HrEventStatus, number>>;
+  const byStatus = Object.fromEntries(rows.map(row => [row.status, row.value])) as Partial<
+    Record<HrEventStatus, number>
+  >;
+  const repeated = Object.fromEntries(rows.map(row => [row.status, row.repeated])) as Partial<
+    Record<HrEventStatus, number>
+  >;
+  return {
+    ...byStatus,
+    all: rows.reduce((sum, row) => sum + row.value, 0),
+    duplicate: rows.reduce((sum, row) => sum + row.repeated, 0),
+    repeated,
+    retrying: rows.find(row => row.status === 'failed')?.scheduled ?? 0,
+  };
 }
 
 export async function getHrEventStatus(companyId: string, eventId: string) {

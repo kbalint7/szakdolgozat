@@ -1,26 +1,24 @@
-import {
-  SkeletonCard,
-  SkeletonField,
-  SkeletonForm,
-  SkeletonPage,
-  SkeletonPageHeader,
-  SkeletonSplit,
-} from '@/components/page-skeleton';
+import { SkeletonPage, SkeletonPageHeader } from '@/components/page-skeleton';
+import { Narrow } from '@/components/split-layout';
+import { Card, CardContent } from '@/components/ui/card';
+
+import { ProductFormSkeleton } from '../product-form-skeleton';
 
 export default function Loading() {
   return (
     <SkeletonPage>
-      <SkeletonPageHeader back title="w-28" description="w-96" />
-      <SkeletonSplit asideLines={2}>
-        <SkeletonCard title={false} description={false}>
-          <SkeletonForm className="max-w-2xl">
-            <SkeletonField />
-            <SkeletonField described />
-            <SkeletonField described />
-            <SkeletonField kind="textarea" />
-          </SkeletonForm>
-        </SkeletonCard>
-      </SkeletonSplit>
+      <SkeletonPageHeader
+        trail="‹ Termékek"
+        title="Új termék"
+        description="Az új termék egyelőre rejtett. Adj hozzá csomagokat, utána publikáld."
+      />
+      <Narrow>
+        <Card>
+          <CardContent>
+            <ProductFormSkeleton submit="Létrehozás" />
+          </CardContent>
+        </Card>
+      </Narrow>
     </SkeletonPage>
   );
 }

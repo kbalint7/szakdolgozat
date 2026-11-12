@@ -20,7 +20,7 @@ export const manualEventSchema = z
   })
   .superRefine((value, ctx) => {
     if (value.type !== 'employee.terminated' && !value.jobRole) {
-      ctx.addIssue({ code: 'custom', path: ['jobRole'], message: 'Belépésnél és munkakörváltásnál kötelező.' });
+      ctx.addIssue({ code: 'custom', path: ['jobRole'], message: 'Belépésnél és munkakörváltásnál meg kell adni.' });
     }
   });
 

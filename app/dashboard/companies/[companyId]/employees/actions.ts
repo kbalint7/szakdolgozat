@@ -30,15 +30,20 @@ export async function submitManualEventAction(
     const result = await processEvent(ingested.id);
     switch (result.outcome) {
       case 'processed':
-        message = 'Az esemény feldolgozva, a helyek frissültek.';
+        message = 'Az eseményt feldolgoztuk, és frissítettük a helyeket.';
         break;
       case 'stale':
-        message = 'Az esemény régebbi, mint a munkavállaló jelenlegi állapota, ezért nem változtatott semmin.';
+        message = 'Ennél frissebb adatunk van a munkavállalóról, ezért nem változott semmi.';
         break;
       case 'failed':
-        return { status: 'error', message: `A feldolgozás nem sikerült: ${result.error}` };
+        return {
+          status: 'error',
+          message: result.retryAt
+            ? 'Az eseményt rögzítettük, de nem sikerült feldolgozni. Hamarosan újra megpróbáljuk. A részleteket a HR-események között találod.'
+            : 'Az eseményt rögzítettük, de nem sikerült feldolgozni. A részleteket a HR-események között találod.',
+        };
       default:
-        message = 'Az esemény rögzítve.';
+        message = 'Az eseményt rögzítettük.';
     }
   } catch (error) {
     return failure(error, formData);
@@ -62,7 +67,9 @@ export async function linkEmployeeAction(
     return failure(error, formData);
   }
   refresh();
-  return success('A fiókot összekapcsoltuk a munkavállalóval: mostantól ő használhatja a helyét.');
+  return success(
+    'A fiókot összekapcsoltuk a munkavállalóval. Ezzel a fiókkal használhatja a szoftvereket, amelyekből helye van.',
+  );
 }
 
 export async function unlinkEmployeeAction(companyId: string, employeeId: string): Promise<ActionState> {
@@ -74,6 +81,6 @@ export async function unlinkEmployeeAction(companyId: string, employeeId: string
   }
   refresh();
   return success(
-    'A kapcsolatot megszüntettük. A hely megmarad, de a szoftvert nem lehet használni, amíg nincs összekapcsolt fiók.',
+    'A fiókot leválasztottuk. A munkavállaló nem tudja használni a cég szoftvereit, amíg nincs összekapcsolt fiókja.',
   );
 }

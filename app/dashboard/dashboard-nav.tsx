@@ -21,6 +21,7 @@ import {
 import { useParams } from 'next/navigation';
 
 import { NavLinks, type NavItem, type NavSection } from '@/components/shell/nav-links';
+import { useReportViewerRole } from '@/components/shell/viewer-role';
 import { can, roleLabels, type CompanyAction, type Role } from '@/lib/domain/permissions';
 
 type CompanyLink = { id: string; name: string; role: Role };
@@ -37,21 +38,22 @@ function companyItems(companyId: string): CompanyNavItem[] {
     { href: `${base}/events`, label: 'HR-események', icon: <InboxIcon />, action: 'hrEvents.view' },
     { href: `${base}/checks`, label: 'Ellenőrzések', icon: <ShieldCheckIcon />, action: 'checks.view' },
     { href: `${base}/api-keys`, label: 'API-kulcsok', icon: <KeyRoundIcon />, action: 'apiKeys.manage' },
-    { href: `${base}/audit`, label: 'Audit napló', icon: <ScrollTextIcon />, action: 'audit.view' },
-    { href: `${base}/settings`, label: 'Beállítások', icon: <SettingsIcon />, action: 'company.view' },
+    { href: `${base}/audit`, label: 'Auditnapló', icon: <ScrollTextIcon />, action: 'audit.view' },
+    { href: `${base}/settings`, label: 'Beállítások', icon: <SettingsIcon />, action: 'members.view' },
   ];
 }
 
 export function DashboardNav({ companies, isPlatformAdmin }: { companies: CompanyLink[]; isPlatformAdmin: boolean }) {
   const params = useParams<{ companyId?: string }>();
+  useReportViewerRole(companies.find(company => company.id === params.companyId)?.role);
 
   const sections: NavSection[] = [
     {
       title: 'Személyes',
       items: [
-        { href: '/dashboard', label: 'Áttekintés', icon: <LayoutDashboardIcon />, exact: true },
+        { href: '/dashboard', label: 'Vezérlőpult', icon: <LayoutDashboardIcon />, exact: true },
         { href: '/dashboard/software', label: 'Szoftvereim', icon: <AppWindowIcon /> },
-        { href: '/dashboard/tokens', label: 'Kliens tokenek', icon: <KeySquareIcon /> },
+        { href: '/dashboard/tokens', label: 'Klienstokenek', icon: <KeySquareIcon /> },
         { href: '/dashboard/profile', label: 'Profil', icon: <UserIcon /> },
       ],
     },
@@ -73,7 +75,7 @@ export function DashboardNav({ companies, isPlatformAdmin }: { companies: Compan
               : undefined,
           };
         }),
-        { href: '/dashboard/companies/new', label: 'Új cég', icon: <PlusIcon />, exact: true },
+        { href: '/dashboard/companies/new', label: 'Új cég', icon: <PlusIcon />, exact: true, quiet: true },
       ],
     },
   ];
@@ -81,7 +83,7 @@ export function DashboardNav({ companies, isPlatformAdmin }: { companies: Compan
   if (isPlatformAdmin) {
     sections.push({
       title: 'Platform',
-      items: [{ href: '/admin', label: 'Platform admin', icon: <ShieldIcon /> }],
+      items: [{ href: '/admin', label: 'Adminfelület', icon: <ShieldIcon /> }],
     });
   }
 

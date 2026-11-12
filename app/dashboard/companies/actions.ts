@@ -46,7 +46,7 @@ export async function updateCompanyAction(
     return failure(error, formData);
   }
   refresh();
-  return success('A cég adatai elmentve.');
+  return success('A cég adatait elmentettük.');
 }
 
 export async function deleteCompanyAction(
@@ -113,5 +113,5 @@ export async function transferOwnershipAction(companyId: string, membershipId: s
     return failure(error);
   }
   refresh();
-  return success('A tulajdonjog átadva. Mostantól adminisztrátor vagy.');
+  return success('Átadtad a tulajdonjogot. Mostantól adminisztrátor vagy.');
 }

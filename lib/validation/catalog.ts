@@ -26,12 +26,12 @@ export const planSchema = z.object({
   seatCount: z.coerce
     .number({ error: 'Adj meg egy pozitív egész számot.' })
     .int('Adj meg egy pozitív egész számot.')
-    .positive('A helyek száma legalább 1.')
+    .positive('Legalább 1 hely kell.')
     .max(100_000, 'Legfeljebb 100 000 hely.'),
-  durationDays: optionalPositiveInt('Az időtartam pozitív egész szám (nap), vagy hagyd üresen.'),
+  durationDays: optionalPositiveInt('Adj meg egy pozitív egész számot, vagy hagyd üresen.'),
   priceHuf: z.coerce
-    .number({ error: 'Adj meg egy nem negatív egész összeget.' })
-    .int('Adj meg egy nem negatív egész összeget.')
+    .number({ error: 'Az ár 0 vagy annál nagyobb egész szám legyen.' })
+    .int('Az ár 0 vagy annál nagyobb egész szám legyen.')
     .min(0, 'Az ár nem lehet negatív.')
     .max(1_000_000_000, 'Túl magas ár.'),
   isActive: checkbox,

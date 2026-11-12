@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from 'react';
 
+import { DateTimeField } from '@/components/forms/date-time-field';
 import { SelectField } from '@/components/forms/fields';
 import { FormMessage } from '@/components/forms/form-message';
 import { SubmitButton } from '@/components/forms/submit-button';
@@ -10,6 +11,7 @@ import { useActionFeedback } from '@/components/forms/use-action-feedback';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
+  DialogCancel,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -51,10 +53,14 @@ function ManualEventForm({
   const [state, formAction] = useActionState(submitManualEventAction.bind(null, companyId), initialActionState);
   const [occurredLocal, setOccurredLocal] = useState(localNow);
   const [type, setType] = useState(defaults?.type ?? 'employee.hired');
+  const [hrId, setHrId] = useState(defaults?.hrId ?? '');
+  const [jobRole, setJobRole] = useState(defaults?.jobRole ?? '');
   useActionFeedback(state, onDone);
   const values = state.values;
   const errors = state.fieldErrors ?? {};
   const occurredIso = occurredLocal ? new Date(occurredLocal).toISOString() : '';
+  const needsJobRole = type !== 'employee.terminated';
+  const complete = Boolean(hrId.trim() && occurredLocal && (!needsJobRole || jobRole.trim()));
 
   return (
     <form action={formAction} onReset={keepValues}>
@@ -72,22 +78,24 @@ function ManualEventForm({
           <TextField
             name="hrId"
             label="HR-azonosító"
-            placeholder="E-1042"
-            defaultValue={values?.hrId ?? defaults?.hrId}
+            placeholder="pl. E-1042"
+            value={hrId}
+            onChange={event => setHrId(event.target.value)}
             readOnly={Boolean(defaults?.hrId)}
             errors={errors.hrId}
             required
           />
         </div>
-        {type !== 'employee.terminated' && (
+        {needsJobRole && (
           <>
             <TextField
               name="jobRole"
               label="Munkakör"
-              placeholder="developer"
+              placeholder="pl. developer"
               list="manual-event-job-roles"
               autoComplete="off"
-              defaultValue={values?.jobRole ?? defaults?.jobRole}
+              value={jobRole}
+              onChange={event => setJobRole(event.target.value)}
               errors={errors.jobRole}
               required
             />
@@ -100,30 +108,37 @@ function ManualEventForm({
         )}
         {type === 'employee.hired' && (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <TextField name="name" label="Név" defaultValue={values?.name ?? defaults?.name} errors={errors.name} />
+            <TextField
+              name="name"
+              label="Név"
+              optional
+              defaultValue={values?.name ?? defaults?.name}
+              errors={errors.name}
+            />
             <TextField
               name="email"
               label="E-mail-cím"
               type="email"
+              optional
               defaultValue={values?.email ?? defaults?.email}
               errors={errors.email}
             />
           </div>
         )}
-        <TextField
+        <DateTimeField
           name="occurredAtLocal"
           label="Időpont"
-          type="datetime-local"
           value={occurredLocal}
-          onChange={event => setOccurredLocal(event.target.value)}
-          description="Mikor történt a változás. Egy régebbi időpontú esemény nem írja felül az újabbat."
+          onChange={setOccurredLocal}
+          description="Ha ennél frissebb adatunk van a munkavállalóról, ez az esemény nem változtat semmin."
           errors={errors.occurredAt}
           required
         />
         <input type="hidden" name="occurredAt" value={occurredIso} />
       </FieldGroup>
       <DialogFooter className="mt-6">
-        <SubmitButton>Rögzítés és feldolgozás</SubmitButton>
+        <DialogCancel />
+        <SubmitButton disabled={!complete}>Rögzítés</SubmitButton>
       </DialogFooter>
     </form>
   );
@@ -149,19 +164,9 @@ export function ManualEventDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>HR-esemény rögzítése</DialogTitle>
-          <DialogDescription>
-            Ha nincs HR-rendszeretek, itt rögzítheted a változásokat. Ugyanúgy dolgozzuk fel, mintha a HR-rendszerből
-            érkezett volna.
-          </DialogDescription>
+          <DialogDescription>Ugyanúgy dolgozzuk fel, mintha a HR-rendszerből érkezett volna.</DialogDescription>
         </DialogHeader>
-        {open && (
-          <ManualEventForm
-            companyId={companyId}
-            jobRoles={jobRoles}
-            defaults={defaults}
-            onDone={() => setOpen(false)}
-          />
-        )}
+        <ManualEventForm companyId={companyId} jobRoles={jobRoles} defaults={defaults} onDone={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );

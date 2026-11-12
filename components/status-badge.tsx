@@ -1,16 +1,23 @@
 import { cn } from 'cn';
 
-import { Badge } from '@/components/ui/badge';
-
 export type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'primary';
 
-const variantFor: Record<StatusTone, React.ComponentProps<typeof Badge>['variant']> = {
-  success: 'success',
-  warning: 'warning',
-  danger: 'destructive',
-  info: 'info',
-  neutral: 'secondary',
-  primary: 'default',
+const dotTone: Record<StatusTone, string> = {
+  success: 'bg-success',
+  warning: 'bg-warning',
+  danger: 'bg-destructive',
+  info: 'bg-info',
+  neutral: 'bg-muted-foreground/50',
+  primary: 'bg-primary',
+};
+
+const textTone: Record<StatusTone, string> = {
+  success: '',
+  warning: 'text-warning',
+  danger: 'text-destructive',
+  info: '',
+  neutral: 'text-muted-foreground',
+  primary: '',
 };
 
 export function StatusBadge({
@@ -19,11 +26,16 @@ export function StatusBadge({
   className,
   children,
   ...props
-}: Omit<React.ComponentProps<typeof Badge>, 'variant'> & { tone?: StatusTone; dot?: boolean }) {
+}: Omit<React.ComponentProps<'span'>, 'color'> & { tone?: StatusTone; dot?: boolean | 'hidden' }) {
   return (
-    <Badge variant={variantFor[tone]} className={cn('gap-1.5', className)} {...props}>
-      {dot && <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-current opacity-80" />}
+    <span className={cn('whitespace-nowrap', textTone[tone], className)} {...props}>
+      {dot && (
+        <span
+          aria-hidden
+          className={cn('mr-1.5 inline-block size-1.5 rounded-full align-middle', dot === true && dotTone[tone])}
+        />
+      )}
       {children}
-    </Badge>
+    </span>
   );
 }

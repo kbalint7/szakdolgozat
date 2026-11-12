@@ -30,7 +30,7 @@ export function ModeToggle() {
             <MoonIcon /> Sötét
           </DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="system">
-            <MonitorIcon /> Rendszer
+            <MonitorIcon /> Rendszer szerint
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>

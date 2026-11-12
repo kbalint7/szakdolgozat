@@ -1,64 +1,65 @@
 import { cn } from 'cn';
+import { ChevronRightIcon } from 'lucide-react';
 import Link from 'next/link';
 
-export type Tone = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
+export type Tone = 'default' | 'warning' | 'danger';
 
-const toneClasses: Record<Tone, string> = {
-  default: 'bg-muted text-muted-foreground',
-  primary: 'bg-primary/10 text-primary',
-  success: 'bg-success/12 text-success',
-  warning: 'bg-warning/15 text-warning',
-  danger: 'bg-destructive/10 text-destructive',
-  info: 'bg-info/12 text-info',
+const valueTone: Record<Tone, string> = {
+  default: '',
+  warning: 'text-warning',
+  danger: 'text-destructive',
 };
 
-export function StatCard({
+export function Stat({
   label,
   value,
-  hint,
-  icon,
   tone = 'default',
   href,
-  className,
 }: {
   label: React.ReactNode;
   value: React.ReactNode;
-  hint?: React.ReactNode;
-  icon?: React.ReactNode;
   tone?: Tone;
   href?: string;
-  className?: string;
 }) {
   const body = (
     <>
-      <div className="flex items-start justify-between gap-3">
-        <div className="text-sm text-muted-foreground">{label}</div>
-        {icon && (
-          <div
-            className={cn(
-              'flex size-8 shrink-0 items-center justify-center rounded-lg [&_svg]:size-4',
-              toneClasses[tone],
-            )}
-          >
-            {icon}
-          </div>
-        )}
+      <div className="min-w-0 text-[13px] text-muted-foreground max-sm:text-sm max-sm:text-foreground">{label}</div>
+      <div className={cn('nums text-xl leading-7 font-semibold tracking-tight sm:mt-1 sm:text-2xl', valueTone[tone])}>
+        {value}
       </div>
-      <div className="nums mt-1 text-2xl font-semibold tracking-tight">{value}</div>
-      {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </>
   );
-  const base = 'flex flex-col rounded-xl bg-card p-4 text-card-foreground shadow-card ring-1 ring-foreground/8';
+  const base =
+    'flex items-center justify-between gap-4 bg-card px-5 py-3 sm:flex-col sm:items-start sm:justify-start sm:gap-0 sm:py-4';
   if (href) {
     return (
-      <Link href={href} className={cn(base, 'transition-shadow hover:shadow-md hover:ring-primary/40', className)}>
+      <Link
+        href={href}
+        className={cn(
+          base,
+          'group relative transition-colors outline-none hover:bg-[color-mix(in_oklab,var(--muted)_40%,var(--card))] focus-visible:bg-[color-mix(in_oklab,var(--muted)_40%,var(--card))] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset max-sm:pr-10',
+        )}
+      >
         {body}
+        <ChevronRightIcon
+          aria-hidden
+          className="absolute top-1/2 right-4 size-4 -translate-y-1/2 text-muted-foreground/60 transition-[translate,color] group-hover:translate-x-0.5 group-hover:text-foreground sm:top-4 sm:translate-y-0.5"
+        />
       </Link>
     );
   }
-  return <div className={cn(base, className)}>{body}</div>;
+  return <div className={base}>{body}</div>;
 }
 
-export function StatGrid({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn('grid grid-cols-2 gap-3 lg:grid-cols-4', className)}>{children}</div>;
+export function StatStrip({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-1 gap-px overflow-hidden rounded-xl bg-border shadow-card ring-1 ring-border sm:auto-cols-fr sm:grid-flow-col',
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
 }

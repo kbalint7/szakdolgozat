@@ -22,7 +22,7 @@ export async function issueKeyAction(
     return failure(error, formData);
   }
   refresh();
-  return success('A licenckulcs elkészült.', { licenseKey });
+  return success('A licenckulcsot kiadtuk.', { licenseKey });
 }
 
 export async function revokeLicenseAction(licenseId: string): Promise<ActionState> {
@@ -33,7 +33,7 @@ export async function revokeLicenseAction(licenseId: string): Promise<ActionStat
     return failure(error);
   }
   refresh();
-  return success('A licencet visszavontuk, a helyeket újraszámoltuk.');
+  return success('A licencet visszavontuk, és a cég helyeit ehhez igazítottuk.');
 }
 
 export async function revokeLicenseKeyAction(licenseKeyId: string): Promise<ActionState> {

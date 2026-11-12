@@ -23,7 +23,7 @@ export async function createApiKeyAction(
     return failure(error, formData);
   }
   refresh();
-  return success('Az API-kulcs elkészült.', { token });
+  return success('Az API-kulcsot létrehoztuk.', { token });
 }
 
 export async function revokeApiKeyAction(companyId: string, keyId: string): Promise<ActionState> {
@@ -34,5 +34,5 @@ export async function revokeApiKeyAction(companyId: string, keyId: string): Prom
     return failure(error);
   }
   refresh();
-  return success('Az API-kulcsot visszavontuk. A következő kérést 401-gyel elutasítjuk.');
+  return success('Az API-kulcsot visszavontuk. A vele küldött kéréseket mostantól elutasítjuk.');
 }

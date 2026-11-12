@@ -12,7 +12,7 @@ export function licenseState(license: LicenseLike, now: Date) {
 export function LicenseStatusBadge({ license, now }: { license: LicenseLike; now: Date }) {
   switch (licenseState(license, now)) {
     case 'revoked':
-      return <StatusBadge tone="danger">Visszavont</StatusBadge>;
+      return <StatusBadge tone="danger">Visszavonva</StatusBadge>;
     case 'pending':
       return <StatusBadge tone="info">Még nem érvényes</StatusBadge>;
     case 'expired':

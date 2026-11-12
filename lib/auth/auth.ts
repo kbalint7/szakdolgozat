@@ -44,7 +44,7 @@ export const auth = betterAuth({
       if (!parsed.success) {
         throw new APIError('BAD_REQUEST', {
           code: 'VALIDATION_FAILED',
-          message: parsed.error.issues[0]?.message ?? 'Érvénytelen adatok.',
+          message: parsed.error.issues[0]?.message ?? 'Hibás adatok. Ellenőrizd őket, és próbáld újra.',
         });
       }
     }),

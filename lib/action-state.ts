@@ -25,7 +25,6 @@ export function formValues(formData: FormData): Record<string, string> {
 export function validationError(error: z.ZodError, formData?: FormData): ActionState<never> {
   return {
     status: 'error',
-    message: 'Ellenőrizd a kiemelt mezőket.',
     fieldErrors: toFieldErrors(error),
     values: formData ? formValues(formData) : undefined,
   };

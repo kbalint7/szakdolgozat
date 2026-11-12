@@ -11,6 +11,7 @@ export type NavItem = {
   icon?: React.ReactNode;
   exact?: boolean;
   meta?: string;
+  quiet?: boolean;
   children?: NavItem[];
 };
 
@@ -24,26 +25,32 @@ function isActive(pathname: string | null, item: NavItem) {
 }
 
 function Item({ item, pathname, onNavigate }: { item: NavItem; pathname: string | null; onNavigate?: () => void }) {
-  const active = isActive(pathname, item);
+  const current = isActive(pathname, item);
+  const active = current && !item.quiet;
   return (
     <>
       <Link
         href={item.href}
         onClick={onNavigate}
-        aria-current={active ? 'page' : undefined}
+        aria-current={current ? 'page' : undefined}
         className={cn(
-          'flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50 [&_svg]:size-4 [&_svg]:shrink-0',
+          'flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4 [&_svg]:shrink-0',
           active
-            ? 'bg-primary/10 font-medium text-primary [&_svg]:text-primary'
-            : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground [&_svg]:text-muted-foreground',
+            ? 'bg-card font-medium text-foreground shadow-card ring-1 ring-border dark:bg-sidebar-accent dark:ring-white/12 [&_svg]:text-primary'
+            : cn(
+                'hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
+                current
+                  ? 'font-medium text-foreground [&_svg]:text-primary'
+                  : 'text-sidebar-foreground/75 [&_svg]:text-muted-foreground/80',
+              ),
         )}
       >
         {item.icon}
         <span className="truncate">{item.label}</span>
-        {item.meta && <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">{item.meta}</span>}
+        {item.meta && <span className="ml-auto shrink-0 text-xs font-normal text-muted-foreground">{item.meta}</span>}
       </Link>
       {item.children && item.children.length > 0 && (
-        <div className="my-0.5 ml-5 flex flex-col gap-0.5 border-l border-sidebar-border pl-2">
+        <div className="my-1 ml-4.5 flex flex-col gap-0.5 border-l border-sidebar-border pl-2.5">
           {item.children.map(child => (
             <Item key={child.href} item={child} pathname={pathname} onNavigate={onNavigate} />
           ))}
@@ -59,9 +66,7 @@ function Links({ sections, onNavigate, pathname }: NavLinksProps & { pathname: s
       {sections.map((section, index) => (
         <div key={section.title ?? index} className="flex flex-col gap-0.5">
           {section.title && (
-            <div className="px-3 pb-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground/80 uppercase">
-              {section.title}
-            </div>
+            <div className="px-2.5 pb-1.5 text-xs font-medium text-muted-foreground/80">{section.title}</div>
           )}
           {section.items.map(item => (
             <Item key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />

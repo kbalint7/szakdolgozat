@@ -1,542 +1,460 @@
 import { cn } from 'cn';
 
+import { TableCard } from '@/components/table-card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Field, FieldContent, FieldDescription, FieldGroup } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-const lineSizes = {
-  xs: ['h-4', 'h-2.5'],
-  label: ['h-3.5', 'h-2.5'],
-  sm: ['h-5', 'h-3'],
-  title: ['h-5.5', 'h-3.5'],
-  base: ['h-6', 'h-3.5'],
-  lg: ['h-7', 'h-4'],
-  xl: ['h-7', 'h-4.5'],
-  '2xl': ['h-8', 'h-5'],
-  '3xl': ['h-9', 'h-6'],
-  chip: ['h-7', 'h-6'],
-} as const;
+const textBar: React.CSSProperties = {
+  backgroundImage:
+    'radial-gradient(closest-side, var(--muted) 96%, transparent), radial-gradient(closest-side, var(--muted) 96%, transparent), linear-gradient(var(--muted), var(--muted))',
+  backgroundSize: '0.8em 0.8em, 0.8em 0.8em, calc(100% - 0.8em) 0.8em',
+  backgroundPosition: '0 50%, 100% 50%, 50% 50%',
+  backgroundRepeat: 'no-repeat',
+  boxDecorationBreak: 'clone',
+  WebkitBoxDecorationBreak: 'clone',
+};
 
-export function SkeletonLine({
-  size = 'sm',
-  w = 'w-32',
+export function SkeletonText({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span
+      data-slot="skeleton"
+      aria-hidden
+      className={cn('animate-pulse text-transparent select-none', className)}
+      style={textBar}
+    >
+      {children}
+    </span>
+  );
+}
+
+const buttonSizes = {
+  sm: 'h-7 text-[0.8rem]',
+  default: 'h-8 text-sm',
+  lg: 'h-9 text-sm',
+};
+
+export function SkeletonButton({
+  children,
+  size = 'default',
   className,
 }: {
-  size?: keyof typeof lineSizes;
-  w?: string;
+  children: React.ReactNode;
+  size?: keyof typeof buttonSizes;
   className?: string;
 }) {
-  const [line, bar] = lineSizes[size];
   return (
-    <div className={cn('flex items-center', line, className)}>
-      <Skeleton className={cn(bar, 'max-w-full', w)} />
-    </div>
+    <span
+      data-slot="skeleton"
+      aria-hidden
+      className={cn(
+        'inline-flex shrink-0 animate-pulse items-center justify-center rounded-lg border border-transparent bg-muted px-2.5 font-medium whitespace-nowrap text-transparent select-none',
+        buttonSizes[size],
+        className,
+      )}
+    >
+      {children}
+    </span>
   );
 }
 
-export function SkeletonButton({ w = 'w-28', className }: { w?: string; className?: string }) {
-  return <Skeleton className={cn('h-8 shrink-0 rounded-lg', w, className)} />;
-}
-
-export function SkeletonBadge({ w = 'w-20' }: { w?: string }) {
-  return <Skeleton className={cn('h-5 shrink-0 rounded-4xl', w)} />;
-}
-
-function Lines({
-  count,
-  size = 'sm',
-  last = 'w-2/3',
-}: {
-  count: number;
-  size?: keyof typeof lineSizes;
-  last?: string;
-}) {
+export function SkeletonRowAction({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div>
-      {Array.from({ length: count }, (_, i) => (
-        <SkeletonLine key={i} size={size} w={i === count - 1 ? last : 'w-full'} />
-      ))}
-    </div>
+    <span
+      className={cn(
+        '-my-1 -mr-2 inline-flex h-7 shrink-0 items-center border border-transparent px-2.5 text-[0.8rem] font-medium whitespace-nowrap',
+        className,
+      )}
+    >
+      <SkeletonText>{children}</SkeletonText>
+    </span>
   );
 }
 
-export function SkeletonPage({ children, className }: { children: React.ReactNode; className?: string }) {
+export function SkeletonStatus({ children }: { children: React.ReactNode }) {
   return (
-    <div className={cn('flex flex-col gap-6', className)} aria-busy="true" aria-label="Betöltés…">
+    <span className="whitespace-nowrap">
+      <span className="mr-1.5 inline-block size-1.5 align-middle" />
+      <SkeletonText>{children}</SkeletonText>
+    </span>
+  );
+}
+
+export function SkeletonInput({ textarea = false, className }: { textarea?: boolean; className?: string }) {
+  return <Skeleton className={cn('w-full rounded-lg', textarea ? 'h-16' : 'h-8', className)} />;
+}
+
+export function SkeletonPage({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="contents" aria-busy="true" aria-label="Betöltés…">
       {children}
     </div>
   );
 }
 
 export function SkeletonPageHeader({
-  back = false,
-  eyebrow = true,
-  title = 'w-56',
-  description = 'w-96',
-  lines = 1,
-  meta = 0,
-  actions = 0,
+  trail,
+  trailMobileOnly = false,
+  title,
+  description,
+  meta,
+  actions,
 }: {
-  back?: boolean;
-  eyebrow?: boolean;
-  title?: string;
-  description?: string | false;
-  lines?: number;
-  meta?: number;
-  actions?: number;
+  trail?: string;
+  trailMobileOnly?: boolean;
+  title: string;
+  description?: string;
+  meta?: React.ReactNode;
+  actions?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      {back && <SkeletonLine size="sm" w="w-32" />}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 space-y-1.5">
-          {eyebrow && <SkeletonLine size="xs" w="w-20" />}
-          <SkeletonLine size="2xl" w={title} />
-          {description && (lines > 1 ? <Lines count={lines} /> : <SkeletonLine size="sm" w={description} />)}
-          {meta > 0 && (
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              {Array.from({ length: meta }, (_, i) => (
-                <SkeletonBadge key={i} />
-              ))}
-            </div>
-          )}
+    <div className="flex flex-col gap-2">
+      {trail && (
+        <div className={cn('truncate text-[13px]', trailMobileOnly && 'md:hidden')}>
+          <SkeletonText>{trail}</SkeletonText>
         </div>
-        {actions > 0 && (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
-            {Array.from({ length: actions }, (_, i) => (
-              <SkeletonButton key={i} />
-            ))}
+      )}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-1.5">
+          <div className="text-[1.625rem] leading-8 font-semibold tracking-tight text-balance">
+            <SkeletonText>{title}</SkeletonText>
           </div>
-        )}
+          {description && (
+            <p className="max-w-[68ch] text-sm/relaxed text-pretty">
+              <SkeletonText>{description}</SkeletonText>
+            </p>
+          )}
+          {meta && <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 pt-1 text-sm">{meta}</div>}
+        </div>
+        {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
       </div>
     </div>
   );
 }
 
-export function SkeletonStatGrid({ count = 4, hint = false }: { count?: number; hint?: boolean }) {
-  return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="flex flex-col rounded-xl bg-card p-4 shadow-card ring-1 ring-foreground/8">
-          <div className="flex items-start justify-between gap-3">
-            <SkeletonLine size="sm" w="w-20" />
-            <Skeleton className="size-8 shrink-0 rounded-lg" />
-          </div>
-          <SkeletonLine size="2xl" w="w-14" className="mt-1" />
-          {hint && <SkeletonLine size="xs" w="w-24" className="mt-1" />}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function SkeletonSection({
-  title = 'w-40',
-  description = 'w-80',
-  actions = false,
+  title,
+  count = false,
+  description,
+  actions,
   children,
+  className,
 }: {
-  title?: string;
-  description?: string | false;
-  actions?: boolean;
+  title: string;
+  count?: boolean;
+  description?: string;
+  actions?: React.ReactNode;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0 space-y-0.5">
-          <SkeletonLine size="lg" w={title} />
-          {description && <SkeletonLine size="sm" w={description} />}
+    <section className={cn('flex flex-col gap-3', className)}>
+      <div className="space-y-0.5">
+        <div className={cn('flex items-center justify-between gap-3', actions && 'min-h-8')}>
+          <div className="min-w-0 text-base font-semibold tracking-tight">
+            <SkeletonText>{title}</SkeletonText>
+            {count && <SkeletonText className="ml-2 font-normal">00</SkeletonText>}
+          </div>
+          {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </div>
-        {actions && <SkeletonButton />}
+        {description && (
+          <p className="max-w-[68ch] text-sm text-pretty">
+            <SkeletonText>{description}</SkeletonText>
+          </p>
+        )}
       </div>
       {children}
     </section>
   );
 }
 
-const columnWidths = ['w-36', 'w-24', 'w-20', 'w-28', 'w-16', 'w-24', 'w-20', 'w-24', 'w-16'];
-
-export function SkeletonTable({
-  columns = 5,
-  rows = 5,
-  tall = false,
-  mono = false,
-  footer = false,
+export function SkeletonStatStrip({
+  stats,
+  linked = false,
 }: {
-  columns?: number | string[];
-  rows?: number;
-  tall?: boolean | number;
-  mono?: boolean | number;
-  footer?: boolean;
+  stats: [label: string, value: string][];
+  linked?: boolean;
 }) {
-  const widths = typeof columns === 'number' ? columnWidths.slice(0, columns) : columns;
-  const tallIndex = tall === true ? 0 : tall === false ? -1 : tall;
-  const monoIndex = mono === true ? 0 : mono === false ? -1 : mono;
   return (
-    <div className="overflow-hidden rounded-xl bg-card shadow-card ring-1 ring-foreground/8">
-      <div className="flex h-9 items-center gap-6 border-b bg-muted/40 px-3">
-        {widths.map((w, i) => (
-          <Skeleton key={i} className={cn('h-2.5 shrink-0', w)} />
-        ))}
-      </div>
-      {Array.from({ length: rows }, (_, r) => (
-        <div key={r} className={cn('flex items-center gap-6 px-3 py-2.5', r < rows - 1 && 'border-b')}>
-          {widths.map((w, i) =>
-            i === tallIndex ? (
-              <div key={i} className={cn('flex shrink-0 flex-col', w)}>
-                <SkeletonLine size="sm" w="w-full" />
-                <SkeletonLine size="xs" w="w-2/3" />
-              </div>
-            ) : (
-              <SkeletonLine key={i} size={i === monoIndex ? 'chip' : 'sm'} w={w} className="shrink-0" />
-            ),
+    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl bg-border shadow-card ring-1 ring-border sm:auto-cols-fr sm:grid-flow-col">
+      {stats.map(([label, value]) => (
+        <div
+          key={label}
+          className={cn(
+            'flex items-center justify-between gap-4 bg-card px-5 py-3 sm:flex-col sm:items-start sm:justify-start sm:gap-0 sm:py-4',
+            linked && 'max-sm:pr-10',
           )}
+        >
+          <div className="min-w-0 text-[13px] max-sm:text-sm">
+            <SkeletonText>{label}</SkeletonText>
+          </div>
+          <div className="nums text-xl leading-7 font-semibold tracking-tight sm:mt-1 sm:text-2xl">
+            <SkeletonText>{value}</SkeletonText>
+          </div>
         </div>
       ))}
-      {footer && (
-        <div className="flex items-center gap-2 border-t bg-muted/30 px-3 py-2">
-          <SkeletonLine size="sm" w="w-24" />
-        </div>
-      )}
     </div>
   );
 }
 
-export function SkeletonCard({
-  title = 'w-40',
-  description = 'w-80',
-  lines = 1,
-  children,
-  className,
+export type SkeletonColumn = {
+  head?: string;
+  label?: React.ReactNode;
+  cell?: string;
+  content?: React.ReactNode | ((row: number) => React.ReactNode);
+};
+
+export function SkeletonTable({
+  columns,
+  rows,
+  header,
+  table,
+  footer,
 }: {
-  title?: string | false;
-  description?: string | false;
-  lines?: number;
-  children: React.ReactNode;
-  className?: string;
+  columns: SkeletonColumn[];
+  rows: number;
+  header?: string | false;
+  table?: string;
+  footer?: React.ReactNode;
 }) {
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-4 overflow-hidden rounded-xl bg-card py-4 shadow-card ring-1 ring-foreground/8',
-        className,
-      )}
-    >
+    <TableCard footer={footer}>
+      <Table className={table}>
+        {header !== false && (
+          <TableHeader className={header}>
+            <TableRow>
+              {columns.map((column, index) => (
+                <TableHead key={index} className={column.head}>
+                  {typeof column.label === 'string' ? <SkeletonText>{column.label}</SkeletonText> : column.label}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+        )}
+        <TableBody>
+          {Array.from({ length: rows }, (_, row) => (
+            <TableRow key={row} className="relative hover:bg-transparent">
+              {columns.map((column, index) => (
+                <TableCell key={index} className={column.cell}>
+                  {typeof column.content === 'function' ? column.content(row) : column.content}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableCard>
+  );
+}
+
+export function SkeletonChevron() {
+  return <span className="ml-auto block size-4" />;
+}
+
+export function SkeletonLoadMore() {
+  return (
+    <div className="mx-auto flex items-center gap-3">
+      <SkeletonButton size="sm">Továbbiak betöltése</SkeletonButton>
+      <SkeletonText>25 / 124</SkeletonText>
+    </div>
+  );
+}
+
+export function SkeletonMeta({ items, className }: { items: string[]; className?: string }) {
+  return (
+    <span className={cn('block overflow-hidden text-[13px] leading-[1.125rem]', className)}>
+      <span className="-ml-[1em] flex flex-wrap">
+        {items.map(item => (
+          <span key={item} className="whitespace-nowrap before:inline-block before:w-[1em] before:content-['']">
+            <SkeletonText>{item}</SkeletonText>
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
+export function SkeletonCard({
+  title,
+  description,
+  children,
+}: {
+  title?: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card>
       {(title || description) && (
-        <div className="grid gap-1 px-4">
-          {title && <SkeletonLine size="title" w={title} />}
-          {description && (lines > 1 ? <Lines count={lines} /> : <SkeletonLine size="sm" w={description} />)}
-        </div>
+        <CardHeader>
+          {title && (
+            <CardTitle>
+              <SkeletonText>{title}</SkeletonText>
+            </CardTitle>
+          )}
+          {description && (
+            <CardDescription>
+              <SkeletonText>{description}</SkeletonText>
+            </CardDescription>
+          )}
+        </CardHeader>
       )}
-      <div className="px-4">{children}</div>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
+
+function Label({ children }: { children: string }) {
+  return (
+    <div className="w-fit text-sm leading-snug font-medium">
+      <SkeletonText>{children}</SkeletonText>
     </div>
   );
 }
 
 export function SkeletonField({
+  label,
   kind = 'input',
-  described = false,
+  description,
+  control,
 }: {
+  label: string;
   kind?: 'input' | 'textarea' | 'checkbox';
-  described?: boolean | number;
+  description?: string | string[];
+  control?: string;
 }) {
+  const help = description && (
+    <FieldDescription>
+      {typeof description === 'string' ? (
+        <SkeletonText>{description}</SkeletonText>
+      ) : (
+        <span className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+          {description.map(item => (
+            <span key={item}>
+              <SkeletonText>{item}</SkeletonText>
+            </span>
+          ))}
+        </span>
+      )}
+    </FieldDescription>
+  );
   if (kind === 'checkbox') {
     return (
-      <div className="flex items-start gap-2">
-        <Skeleton className="mt-0.5 size-4 shrink-0 rounded-[4px]" />
-        <div className="flex flex-1 flex-col gap-0.5">
-          <SkeletonLine size="sm" w="w-48" />
-          {described && <SkeletonLine size="sm" w="w-72" />}
-        </div>
-      </div>
+      <Field orientation="horizontal">
+        <Skeleton className="mt-px size-4 shrink-0 rounded-[4px]" />
+        <FieldContent>
+          <Label>{label}</Label>
+          {help}
+        </FieldContent>
+      </Field>
     );
   }
   return (
-    <div className="flex flex-col gap-2">
-      <SkeletonLine size="sm" w="w-24" />
-      <Skeleton className={cn('w-full rounded-lg', kind === 'textarea' ? 'h-16' : 'h-8')} />
-      {described && <Lines count={described === true ? 1 : described} last="w-3/5" />}
-    </div>
+    <Field>
+      <Label>{label}</Label>
+      <SkeletonInput textarea={kind === 'textarea'} className={control} />
+      {help}
+    </Field>
   );
 }
 
 export function SkeletonForm({
   children,
-  submit = 'w-32',
-  className,
+  submit,
+  submitClassName,
 }: {
   children: React.ReactNode;
-  submit?: string | false;
-  className?: string;
+  submit: string;
+  submitClassName?: string;
 }) {
   return (
-    <div className={cn('flex flex-col gap-5', className)}>
+    <FieldGroup>
       {children}
-      {submit && (
-        <div>
-          <SkeletonButton w={submit} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-export function SkeletonFieldRow({ children, cols = 'sm:grid-cols-2' }: { children: React.ReactNode; cols?: string }) {
-  return <div className={cn('grid grid-cols-1 gap-5', cols)}>{children}</div>;
-}
-
-export function SkeletonInlineForm({ submit = 'w-32' }: { submit?: string }) {
-  return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-      <div className="flex-1">
-        <SkeletonField />
+      <div>
+        <SkeletonButton className={cn('max-sm:w-full', submitClassName)}>{submit}</SkeletonButton>
       </div>
-      <SkeletonButton w={submit} />
-    </div>
+    </FieldGroup>
   );
 }
 
 export function SkeletonCallout({
-  lines = 2,
-  title = true,
+  title,
+  children,
+  after,
+}: {
+  title: string;
+  children: string;
+  after?: React.ReactNode;
+}) {
+  return (
+    <div className="max-w-[46rem] border-l-2 border-border py-0.5 pl-4 text-[13px] text-pretty">
+      <div className="mb-1 font-medium">
+        <SkeletonText>{title}</SkeletonText>
+      </div>
+      <div className="leading-relaxed">
+        <SkeletonText>{children}</SkeletonText>
+        {after}
+      </div>
+    </div>
+  );
+}
+
+export function SkeletonFilterBar({
+  search = 'sm:w-72',
+  chips,
+  children,
+}: {
+  search?: string;
+  chips?: string[];
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <SkeletonInput className={search} />
+      {chips && (
+        <div className="flex gap-1 max-md:-mx-4 max-md:overflow-hidden max-md:pr-12 max-md:pl-4 md:flex-wrap">
+          {chips.map(chip =>
+            chip === '|' ? (
+              <span key={chip} className="mx-1.5 h-4 w-px shrink-0 self-center bg-border" />
+            ) : (
+              <span
+                key={chip}
+                className="inline-flex h-8 shrink-0 items-center rounded-full border border-transparent px-3 text-sm whitespace-nowrap"
+              >
+                <SkeletonText>{chip}</SkeletonText>
+              </span>
+            ),
+          )}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+const seatSizes = { default: { cell: 12, gap: 4 }, lg: { cell: 16, gap: 6 } };
+
+export function SkeletonSeatMeter({
+  seats = 20,
+  size = 'default',
   className,
 }: {
-  lines?: number;
-  title?: boolean;
+  seats?: number;
+  size?: keyof typeof seatSizes;
   className?: string;
 }) {
+  const { cell, gap } = seatSizes[size];
+  const width = seats * cell + (seats - 1) * gap;
   return (
-    <div className={cn('flex gap-3 rounded-xl border-l-4 border-foreground/10 bg-muted/40 px-4 py-3', className)}>
-      <Skeleton className="mt-0.5 size-4 shrink-0 rounded" />
-      <div className="min-w-0 flex-1 space-y-0.5">
-        {title && <SkeletonLine size="sm" w="w-48" />}
-        <Lines count={lines} />
-      </div>
-    </div>
-  );
-}
-
-export function SkeletonSplit({
-  children,
-  aside,
-  asideLines = 4,
-}: {
-  children: React.ReactNode;
-  aside?: React.ReactNode;
-  asideLines?: number;
-}) {
-  return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-      {children}
-      {aside ?? <SkeletonCallout lines={asideLines} className="h-fit" />}
-    </div>
-  );
-}
-
-const chipWidths = ['w-16', 'w-24', 'w-28', 'w-20', 'w-24', 'w-36', 'w-40'];
-
-export function SkeletonChips({ count = 5 }: { count?: number }) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {Array.from({ length: count }, (_, i) => (
-        <Skeleton key={i} className={cn('h-8 rounded-full', chipWidths[i % chipWidths.length])} />
-      ))}
-    </div>
-  );
-}
-
-export function SkeletonSearchBar({ select = false, button = 'w-17' }: { select?: boolean | string; button?: string }) {
-  return (
-    <div className="flex flex-col gap-2 rounded-xl bg-card p-2 shadow-card ring-1 ring-foreground/8 sm:flex-row sm:items-center">
-      <div className="flex-1">
-        <Skeleton className="h-8 w-full rounded-lg" />
-      </div>
-      {select && <Skeleton className={cn('h-8 rounded-lg', select === true ? 'sm:w-44' : select)} />}
-      <SkeletonButton w={button} />
-    </div>
-  );
-}
-
-export function SkeletonFilterBar({ fields = 4 }: { fields?: number }) {
-  return (
-    <div className="grid grid-cols-1 gap-3 rounded-xl bg-card p-3 shadow-card ring-1 ring-foreground/8 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_10rem_10rem_auto]">
-      {Array.from({ length: fields }, (_, i) => (
-        <div key={i} className="flex flex-col gap-1.5">
-          <SkeletonLine size="label" w="w-24" />
-          <Skeleton className="h-8 w-full rounded-lg" />
-        </div>
-      ))}
-      <div className="flex items-end gap-2">
-        <SkeletonButton w="w-20" />
-        <SkeletonButton w="w-16" />
-      </div>
-    </div>
-  );
-}
-
-function CompanyTile() {
-  return (
-    <div className="flex h-full flex-col gap-4 rounded-xl bg-card p-5 shadow-card ring-1 ring-foreground/8">
-      <div className="flex items-start gap-3">
-        <Skeleton className="size-10 shrink-0 rounded-lg" />
-        <div className="min-w-0 flex-1 space-y-1">
-          <SkeletonLine size="base" w="w-40" />
-          <SkeletonLine size="sm" w="w-full" />
-        </div>
-      </div>
-      <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
-        <div className="flex items-center gap-2">
-          <SkeletonBadge w="w-24" />
-          <SkeletonLine size="sm" w="w-10" />
-        </div>
-        <Skeleton className="size-4 rounded" />
-      </div>
-    </div>
-  );
-}
-
-function SoftwareTile() {
-  return (
-    <div className="flex flex-col gap-3 rounded-xl bg-card p-4 shadow-card ring-1 ring-foreground/8">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <SkeletonLine size="base" w="w-32" />
-          <SkeletonLine size="sm" w="w-24" />
-        </div>
-        <Skeleton className="size-8 shrink-0 rounded-lg" />
-      </div>
-      <div className="flex items-center justify-between gap-2">
-        <SkeletonBadge w="w-24" />
-        <SkeletonLine size="xs" w="w-20" />
-      </div>
-    </div>
-  );
-}
-
-function PoolTile() {
-  return (
-    <div className="flex h-full flex-col gap-4 rounded-xl bg-card p-5 shadow-card ring-1 ring-foreground/8">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <SkeletonLine size="base" w="w-32" />
-          <SkeletonLine size="xs" w="w-40" />
-        </div>
-        <SkeletonBadge w="w-16" />
-      </div>
-      <Skeleton className="h-2 w-full rounded-full" />
-      <div className="flex items-center justify-between">
-        <SkeletonLine size="sm" w="w-32" />
-        <SkeletonLine size="sm" w="w-16" />
-      </div>
-    </div>
-  );
-}
-
-function ProductTile() {
-  return (
-    <div className="flex h-full flex-col gap-4 rounded-xl bg-card p-5 shadow-card ring-1 ring-foreground/8">
-      <div className="flex items-start justify-between gap-3">
-        <Skeleton className="size-10 shrink-0 rounded-lg" />
-        <SkeletonLine size="xs" w="w-20" />
-      </div>
-      <div className="space-y-1">
-        <SkeletonLine size="base" w="w-28" />
-        <Lines count={2} />
-      </div>
-      <div className="mt-auto flex items-center justify-between border-t pt-4">
-        <SkeletonLine size="sm" w="w-32" />
-        <SkeletonLine size="sm" w="w-20" />
-      </div>
-    </div>
-  );
-}
-
-const planItemWidths = ['w-28', 'w-32', 'w-52'];
-
-function PlanTile() {
-  return (
-    <div className="flex h-full flex-col gap-4 rounded-xl bg-card p-5 shadow-card ring-1 ring-foreground/8">
-      <div className="space-y-1">
-        <SkeletonLine size="base" w="w-44" />
-        <SkeletonLine size="sm" w="w-28" />
-      </div>
-      <SkeletonLine size="3xl" w="w-36" />
-      <div className="flex flex-col gap-1.5">
-        {planItemWidths.map(w => (
-          <div key={w} className="flex items-start gap-2">
-            <Skeleton className="mt-0.5 size-4 shrink-0 rounded" />
-            <SkeletonLine size="sm" w={w} />
-          </div>
-        ))}
-      </div>
-      <SkeletonButton w="w-full" className="mt-auto" />
-    </div>
-  );
-}
-
-const tiles = { company: CompanyTile, software: SoftwareTile, pool: PoolTile, product: ProductTile, plan: PlanTile };
-
-export function SkeletonTileGrid({
-  tile,
-  count = 2,
-  className = 'sm:grid-cols-2 xl:grid-cols-3',
-}: {
-  tile: keyof typeof tiles;
-  count?: number;
-  className?: string;
-}) {
-  const Tile = tiles[tile];
-  return (
-    <ul className={cn('grid grid-cols-1 gap-4', className)}>
-      {Array.from({ length: count }, (_, i) => (
-        <li key={i}>
-          <Tile />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-export function SkeletonCapacityCard() {
-  return (
-    <div className="rounded-xl bg-card p-4 shadow-card ring-1 ring-foreground/8">
-      <div className="mb-2 flex items-center justify-between">
-        <SkeletonLine size="sm" w="w-28" />
-        <SkeletonLine size="sm" w="w-20" />
-      </div>
-      <Skeleton className="h-2 w-full rounded-full" />
-    </div>
-  );
-}
-
-export function SkeletonDetailList({ items = 4 }: { items?: number }) {
-  return (
-    <div className="grid gap-3">
-      {Array.from({ length: items }, (_, i) => (
-        <div key={i} className="flex flex-col gap-0.5">
-          <SkeletonLine size="xs" w="w-20" />
-          <SkeletonLine size="sm" w={i % 2 ? 'w-48' : 'w-32'} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function SkeletonTimeline({ items = 5 }: { items?: number }) {
-  return (
-    <div className="flex flex-col">
-      {Array.from({ length: items }, (_, i) => (
-        <div
-          key={i}
-          className="relative flex gap-3 pb-5 before:absolute before:top-7 before:bottom-0 before:left-3.5 before:w-px before:bg-border last:pb-0 last:before:hidden"
-        >
-          <Skeleton className="size-7 shrink-0 rounded-full" />
-          <div className="min-w-0 flex-1">
-            <SkeletonLine size="xs" w="w-32" />
-            <SkeletonLine size="sm" w={i % 2 ? 'w-3/4' : 'w-1/2'} />
-            <SkeletonLine size="xs" w="w-2/5" />
-          </div>
-        </div>
-      ))}
+    <div className={cn('flex flex-wrap items-center gap-x-4 gap-y-2', className)}>
+      <Skeleton
+        className="w-full min-w-0 rounded-[4px]"
+        style={{ maxWidth: width, aspectRatio: `${width} / ${cell}` }}
+      />
+      <span className="text-[13px] whitespace-nowrap">
+        <SkeletonText>20 / 20 hely</SkeletonText>
+      </span>
     </div>
   );
 }

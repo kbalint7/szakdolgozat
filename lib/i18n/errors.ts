@@ -1,52 +1,53 @@
 const messages: Record<string, string> = {
-  NOT_FOUND: 'A keresett elem nem található.',
+  NOT_FOUND: 'Ez az elem már nem létezik.',
   FORBIDDEN: 'Ehhez a művelethez nincs jogosultságod.',
   CONFLICT: 'Az adatok időközben megváltoztak. Frissítsd az oldalt, és próbáld újra.',
 
-  PRODUCT_SLUG_TAKEN: 'Ez az azonosító (slug) már foglalt.',
-  PRODUCT_NOT_FOUND: 'A termék nem található.',
-  PLAN_NOT_FOUND: 'A csomag nem található.',
-  PLAN_INACTIVE: 'Ez a csomag már nem vásárolható meg.',
+  PRODUCT_SLUG_TAKEN: 'Ez az azonosító már foglalt.',
+  PRODUCT_NOT_FOUND: 'Ez a termék már nem létezik.',
+  PLAN_NOT_FOUND: 'Ez a csomag már nem létezik.',
+  PLAN_INACTIVE: 'Ez a csomag most nem vásárolható meg.',
 
-  COMPANY_NOT_FOUND: 'A cég nem található.',
-  OWNER_CANNOT_LEAVE: 'A tulajdonos nem léphet ki a cégből. Előbb add át a tulajdonjogot, vagy töröld a céget.',
+  COMPANY_NOT_FOUND: 'Ez a cég nem létezik, vagy nem férsz hozzá.',
+  OWNER_CANNOT_LEAVE: 'Tulajdonosként nem léphetsz ki a cégből. Előbb add át a tulajdonjogot, vagy töröld a céget.',
   CANNOT_REMOVE_OWNER: 'A tulajdonost nem lehet eltávolítani.',
   CANNOT_REMOVE_ADMIN: 'Adminisztrátort csak a tulajdonos távolíthat el.',
-  MEMBER_NOT_FOUND: 'A tag nem található.',
+  MEMBER_NOT_FOUND: 'Ez a tag már nincs a cégben.',
   ALREADY_OWNER: 'Ez a felhasználó már a tulajdonos.',
-  CONFIRMATION_MISMATCH: 'A megerősítő szöveg nem egyezik a cég nevével.',
-  USER_OWNS_COMPANY: 'Amíg céged tulajdonosa vagy, a fiókod nem törölhető. Előbb add át a tulajdonjogot.',
+  CONFIRMATION_MISMATCH: 'A beírt név nem egyezik a cég nevével.',
+  USER_OWNS_COMPANY:
+    'Amíg egy cég tulajdonosa vagy, nem törölheted a fiókodat. Előbb add át a tulajdonjogot, vagy töröld a céget.',
 
   ALREADY_MEMBER: 'Ez a felhasználó már tagja a cégnek.',
   INVITATION_PENDING: 'Erre az e-mail-címre már van függő meghívó.',
   INVITATION_INVALID: 'A meghívó érvénytelen.',
   INVITATION_EXPIRED: 'A meghívó lejárt.',
-  INVITATION_USED: 'A meghívót már felhasználták.',
+  INVITATION_USED: 'Erre a meghívóra már válaszoltak.',
   INVITATION_REVOKED: 'A meghívót visszavonták.',
-  INVITATION_EMAIL_MISMATCH: 'A meghívó másik e-mail-címre szól. Jelentkezz be azzal a fiókkal.',
+  INVITATION_EMAIL_MISMATCH: 'A meghívó másik e-mail-címre szól. Azzal a címmel jelentkezz be.',
 
-  EMPLOYEE_NOT_FOUND: 'A munkavállaló nem található.',
-  EMPLOYEE_ALREADY_LINKED: 'A munkavállaló már egy másik taghoz van kapcsolva.',
-  MEMBERSHIP_ALREADY_LINKED: 'Ez a tag már egy másik munkavállalóhoz van kapcsolva.',
+  EMPLOYEE_NOT_FOUND: 'Ez a munkavállaló már nem létezik.',
+  EMPLOYEE_ALREADY_LINKED: 'A munkavállaló már össze van kapcsolva egy másik taggal.',
+  MEMBERSHIP_ALREADY_LINKED: 'Ez a tag már össze van kapcsolva egy másik munkavállalóval.',
 
-  LICENSE_KEY_UNKNOWN: 'Ismeretlen licenckulcs.',
+  LICENSE_KEY_UNKNOWN: 'Nincs ilyen licenckulcs. Ellenőrizd, hogy jól írtad-e be.',
   LICENSE_KEY_USED: 'Ezt a licenckulcsot már aktiválták.',
   LICENSE_KEY_REVOKED: 'Ezt a licenckulcsot visszavonták.',
-  LICENSE_NOT_FOUND: 'A licenc nem található.',
+  LICENSE_NOT_FOUND: 'Ez a licenc már nem létezik.',
 
   RULE_EXISTS: 'Ilyen szabály már létezik.',
-  RULE_NOT_FOUND: 'A szabály nem található.',
+  RULE_NOT_FOUND: 'Ez a szabály már nem létezik.',
 
-  API_KEY_NOT_FOUND: 'Az API-kulcs nem található.',
-  CLIENT_TOKEN_NOT_FOUND: 'A kliens token nem található.',
+  API_KEY_NOT_FOUND: 'Ez az API-kulcs már nem létezik.',
+  CLIENT_TOKEN_NOT_FOUND: 'Ez a klienstoken már nem létezik.',
 
-  EVENT_NOT_FOUND: 'Az esemény nem található.',
+  EVENT_NOT_FOUND: 'Ez az esemény már nem létezik.',
   EVENT_ID_CONFLICT: 'Ezzel az azonosítóval már érkezett egy eltérő tartalmú esemény.',
-  EVENT_NOT_RETRYABLE: 'Csak sikertelen esemény próbálható újra.',
+  EVENT_NOT_RETRYABLE: 'Csak sikertelen eseményt lehet újrapróbálni.',
 
-  CAPACITY_INVARIANT_VIOLATED: 'Belső hiba: több helyet osztanánk ki, mint amennyi van.',
+  CAPACITY_INVARIANT_VIOLATED: 'Váratlan hiba történt. Próbáld újra, és ha akkor sem megy, szólj az üzemeltetőnek.',
 };
 
 export function errorMessage(code: string): string {
-  return messages[code] ?? 'Váratlan hiba történt.';
+  return messages[code] ?? 'Váratlan hiba történt. Próbáld újra.';
 }

@@ -25,7 +25,7 @@ export async function createTokenAction(
     return failure(error, formData);
   }
   refresh();
-  return success('A token elkészült.', { token });
+  return success('A tokent létrehoztuk.', { token });
 }
 
 export async function revokeTokenAction(tokenId: string): Promise<ActionState> {

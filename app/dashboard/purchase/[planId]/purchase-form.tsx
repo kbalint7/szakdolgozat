@@ -18,7 +18,6 @@ const initialState: ActionState<PurchaseData> = { status: 'idle' };
 
 type PurchaseFormProps = {
   planId: string;
-  priceLabel: string;
   companies: { id: string; name: string }[];
 };
 
@@ -30,7 +29,6 @@ export function PurchaseForm(props: PurchaseFormProps) {
 
 function PurchaseFormBody({
   planId,
-  priceLabel,
   companies,
   onHiddenAfterSubmit,
 }: PurchaseFormProps & { onHiddenAfterSubmit: () => void }) {
@@ -51,8 +49,16 @@ function PurchaseFormBody({
           <AlertTitle>Sikeres vásárlás</AlertTitle>
           <AlertDescription>
             {data.activated
-              ? `A licenc aktiválva (${data.seatCount} hely). Jelenleg ${data.assigned} hely kiosztva, ${data.waiting} munkavállaló vár.`
-              : 'A licenckulcsot bármelyik céged licencoldalán aktiválhatod.'}
+              ? `Aktiváltuk a licencet, amely ${data.seatCount} helyre szól. ${
+                  !data.assigned
+                    ? data.waiting
+                      ? `Még senki sem kapott helyet, ${data.waiting} munkavállaló vár.`
+                      : 'Még senki sem kapott belőle helyet.'
+                    : !data.waiting
+                      ? `Eddig ${data.assigned} helyet osztottunk ki, és senki sem vár.`
+                      : `Eddig ${data.assigned} helyet osztottunk ki, ${data.waiting} munkavállaló vár.`
+                }`
+              : 'A licenckulcsot bármelyik céged Licencek és helyek oldalán aktiválhatod.'}
           </AlertDescription>
         </Alert>
         {!data.activated && <SecretReveal label="Licenckulcs" value={data.licenseKey} />}
@@ -79,13 +85,10 @@ function PurchaseFormBody({
         />
         <CheckboxField
           name="activate"
-          label="Aktiválás azonnal ebben a cégben"
-          description="Kikapcsolva csak a licenckulcsot kapod meg, amit később aktiválhatsz."
+          label="Azonnali aktiválás ennél a cégnél"
+          description="Ha kikapcsolod, csak a licenckulcsot kapod meg. Egyszer mutatjuk meg, és később aktiválhatod."
           defaultChecked={state.values ? state.values.activate === 'on' : true}
         />
-        <p className="text-sm text-muted-foreground">
-          Valódi fizetés nem történik. A rendelés {priceLabel} értékben rögzül.
-        </p>
         <div>
           <SubmitButton>Vásárlás megerősítése</SubmitButton>
         </div>

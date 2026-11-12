@@ -17,12 +17,8 @@ const dateTimeFormatter = new Intl.DateTimeFormat('hu-HU', {
 });
 
 const preciseFormatter = new Intl.DateTimeFormat('hu-HU', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
+  dateStyle: 'medium',
+  timeStyle: 'medium',
   timeZone: TIME_ZONE,
 });
 
@@ -39,6 +35,10 @@ export function formatDate(value: Date | string | null | undefined): string {
   return dateFormatter.format(new Date(value));
 }
 
+export function formatUntil(value: Date | string): string {
+  return `${dateFormatter.format(new Date(value)).replace(/\.$/, '')}-ig`;
+}
+
 export function formatDateTime(value: Date | string | null | undefined): string {
   if (!value) return '–';
   return dateTimeFormatter.format(new Date(value));
@@ -50,7 +50,7 @@ export function formatTimestamp(value: Date | string | null | undefined): string
 }
 
 export function formatDuration(days: number | null): string {
-  if (days === null) return 'Határozatlan idejű';
+  if (days === null) return 'nem jár le';
   if (days % 365 === 0) return `${days / 365} év`;
   if (days % 30 === 0) return `${days / 30} hónap`;
   return `${days} nap`;

@@ -32,7 +32,12 @@ export function LoginForm() {
     setError(undefined);
 
     startTransition(async () => {
-      const { error } = await authClient.signIn.email(parsed.data);
+      const result = await authClient.signIn.email(parsed.data).catch(() => null);
+      if (!result) {
+        setError('Nem sikerült elérni a szervert. Ellenőrizd a kapcsolatot, majd próbáld újra.');
+        return;
+      }
+      const { error } = result;
       if (error) {
         setError(
           error.status === 429

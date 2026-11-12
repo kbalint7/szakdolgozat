@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 
 import { TextareaField } from '@/components/forms/fields';
 import { FormMessage } from '@/components/forms/form-message';
@@ -26,18 +26,20 @@ export function CompanyForm({
   const errors = state.fieldErrors ?? {};
 
   return (
-    <form action={formAction} className="max-w-xl">
+    <form action={formAction}>
       <FieldGroup>
         {state.status === 'error' && <FormMessage status="error" message={state.message} />}
         <TextField
           name="name"
           label="Cégnév"
-          placeholder="Példa Kft."
+          placeholder="pl. Példa Kft."
+          description="A meghívókban is ez a név jelenik meg."
           defaultValue={state.values?.name ?? defaultValues?.name}
           errors={errors.name}
           required
         />
         <TextareaField
+          optional
           name="description"
           label="Leírás"
           rows={3}
@@ -54,21 +56,27 @@ export function CompanyForm({
 
 export function DeleteCompanyForm({ action, companyName }: { action: FormAction; companyName: string }) {
   const [state, formAction] = useActionState(action, initialActionState);
+  const [confirmation, setConfirmation] = useState('');
   const errors = state.fieldErrors ?? {};
+  const matches = confirmation.trim() === companyName.trim();
 
   return (
-    <form action={formAction} className="max-w-xl">
+    <form action={formAction}>
       <FieldGroup>
         {state.status === 'error' && <FormMessage status="error" message={state.message} />}
         <TextField
           name="confirmation"
           label={`A megerősítéshez írd be a cég nevét: ${companyName}`}
           autoComplete="off"
+          value={confirmation}
+          onChange={event => setConfirmation(event.target.value)}
           errors={errors.confirmation}
           required
         />
         <div>
-          <SubmitButton variant="destructive">Cég végleges törlése</SubmitButton>
+          <SubmitButton variant="destructive" disabled={!matches}>
+            Cég végleges törlése
+          </SubmitButton>
         </div>
       </FieldGroup>
     </form>

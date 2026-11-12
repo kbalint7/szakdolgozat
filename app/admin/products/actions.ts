@@ -52,7 +52,7 @@ export async function updateProductAction(
   }
   updateTag(CATALOG_TAG);
   refresh();
-  return success('A termék adatai elmentve.');
+  return success('A termék adatait elmentettük.');
 }
 
 export async function setProductPublishedAction(productId: string, isPublished: boolean): Promise<ActionState> {
@@ -64,7 +64,7 @@ export async function setProductPublishedAction(productId: string, isPublished: 
   }
   updateTag(CATALOG_TAG);
   refresh();
-  return success(isPublished ? 'A termék megjelent a katalógusban.' : 'A termék el van rejtve a katalógusból.');
+  return success(isPublished ? 'A terméket publikáltuk.' : 'A terméket elrejtettük.');
 }
 
 export async function savePlanAction(
@@ -85,7 +85,7 @@ export async function savePlanAction(
   }
   updateTag(CATALOG_TAG);
   refresh();
-  return success(planId ? 'A csomag elmentve.' : 'A csomag létrejött.');
+  return success(planId ? 'A csomagot elmentettük.' : 'A csomagot létrehoztuk.');
 }
 
 export async function setPlanActiveAction(planId: string, isActive: boolean): Promise<ActionState> {
@@ -97,5 +97,5 @@ export async function setPlanActiveAction(planId: string, isActive: boolean): Pr
   }
   updateTag(CATALOG_TAG);
   refresh();
-  return success(isActive ? 'A csomag ismét vásárolható.' : 'A csomag inaktív, nem vásárolható.');
+  return success(isActive ? 'A csomagot aktiváltuk.' : 'A csomagot inaktiváltuk.');
 }

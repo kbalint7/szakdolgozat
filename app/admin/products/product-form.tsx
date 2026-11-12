@@ -23,7 +23,7 @@ export function ProductForm({ action, defaultValues, submitLabel }: ProductFormP
   const errors = state.fieldErrors ?? {};
 
   return (
-    <form action={formAction} className="max-w-2xl">
+    <form action={formAction}>
       <FieldGroup>
         {state.status === 'error' && <FormMessage status="error" message={state.message} />}
         <TextField
@@ -35,23 +35,28 @@ export function ProductForm({ action, defaultValues, submitLabel }: ProductFormP
         />
         <TextField
           name="slug"
-          label="Azonosító (slug)"
-          description="Ezzel hivatkozik a termékre a szoftver az ellenőrzéskor, pl. ide-pro."
+          label="Azonosító"
+          description="Kisbetű, számjegy és kötőjel, pl. ide-pro. A szoftverek ezzel kérdezik le a licencet, ezért ha módosítod, bennük is át kell írni."
+          spellCheck={false}
+          autoCapitalize="none"
           defaultValue={values?.slug ?? defaultValues?.slug}
           errors={errors.slug}
           required
         />
-        <TextField
+        <TextareaField
+          optional
           name="summary"
           label="Rövid leírás"
           description="A katalógus listájában jelenik meg."
+          rows={2}
           defaultValue={values?.summary ?? defaultValues?.summary}
           errors={errors.summary}
         />
         <TextareaField
+          optional
           name="description"
           label="Leírás"
-          rows={6}
+          className="min-h-28"
           defaultValue={values?.description ?? defaultValues?.description}
           errors={errors.description}
         />

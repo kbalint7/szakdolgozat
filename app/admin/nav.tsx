@@ -11,17 +11,17 @@ import type { NavSection } from '@/components/shell/nav-links';
 
 export const adminNav: NavSection[] = [
   {
-    title: 'Platform admin',
+    title: 'Adminfelület',
     items: [
-      { href: '/admin/products', label: 'Termékek és csomagok', icon: <PackageIcon /> },
-      { href: '/admin/orders', label: 'Rendelések és kulcsok', icon: <ReceiptIcon /> },
+      { href: '/admin/products', label: 'Termékek', icon: <PackageIcon /> },
+      { href: '/admin/orders', label: 'Rendelések', icon: <ReceiptIcon /> },
       { href: '/admin/stats', label: 'Statisztika', icon: <BarChart3Icon /> },
       { href: '/admin/companies', label: 'Cégek', icon: <BuildingIcon /> },
-      { href: '/admin/audit', label: 'Audit napló', icon: <ScrollTextIcon /> },
+      { href: '/admin/audit', label: 'Auditnapló', icon: <ScrollTextIcon /> },
     ],
   },
   {
-    title: 'Saját fiók',
+    title: 'Személyes',
     items: [{ href: '/dashboard', label: 'Vezérlőpult', icon: <LayoutDashboardIcon /> }],
   },
 ];

@@ -9,7 +9,7 @@ export const jobRoleSchema = z
 
 export const ruleSchema = z.object({
   jobRole: jobRoleSchema,
-  productId: z.uuid({ error: 'Válassz terméket.' }),
+  productId: z.uuid({ error: 'Válassz szoftvert.' }),
 });
 
 export type RuleInput = z.infer<typeof ruleSchema>;

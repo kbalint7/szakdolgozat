@@ -19,20 +19,18 @@ export function SecretReveal({ label, value, note }: { label: string; value: str
   }
 
   return (
-    <div role="alert" className="flex flex-col gap-3 rounded-xl border border-success/40 bg-success/5 p-4 text-sm">
-      <div className="flex items-start gap-3">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-success/15 text-success">
-          <KeyRoundIcon className="size-4" />
-        </span>
+    <div role="alert" className="flex flex-col gap-3 rounded-xl bg-success/6 p-4 text-sm ring-1 ring-success/25">
+      <div className="flex gap-3">
+        <KeyRoundIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-success" />
         <div className="min-w-0 space-y-0.5">
           <div className="font-medium">{label}</div>
           <p className="text-pretty text-muted-foreground">
-            {note ?? 'Csak most látod: később nem tudjuk újra megmutatni, ezért mentsd el.'}
+            {note ?? 'Mentsd el most, mert később nem tudjuk újra megmutatni.'}
           </p>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <code className="min-w-0 flex-1 rounded-lg bg-card px-3 py-2 font-mono text-sm break-all ring-1 ring-foreground/8">
+        <code className="min-w-0 flex-1 rounded-lg bg-card px-3 py-2 font-mono text-[13px] break-all ring-1 ring-border">
           {value}
         </code>
         <Button type="button" variant="outline" size="icon" onClick={copy} aria-label="Másolás vágólapra">

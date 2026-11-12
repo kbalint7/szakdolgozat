@@ -1,49 +1,61 @@
-import { Skeleton } from '@/components/ui/skeleton';
 import {
-  SkeletonCard,
   SkeletonField,
   SkeletonForm,
-  SkeletonLine,
+  SkeletonMeta,
   SkeletonPage,
   SkeletonPageHeader,
-  SkeletonSplit,
+  SkeletonText,
 } from '@/components/page-skeleton';
+import { SplitLayout } from '@/components/split-layout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Loading() {
   return (
     <SkeletonPage>
-      <SkeletonPageHeader back title="w-32" description="w-72" />
-      <SkeletonSplit
+      <SkeletonPageHeader
+        trail="‹ IDE Pro"
+        title="Vásárlás"
+        description="Válaszd ki, melyik cég nevére szóljon a licenc."
+      />
+      <SplitLayout
+        className="max-xl:[&>aside]:order-first xl:[&>aside]:pt-0"
         aside={
-          <SkeletonCard title={false} description={false} className="h-fit">
-            <div className="flex flex-col gap-1">
-              <Skeleton className="mb-1 size-9 rounded-lg" />
-              <SkeletonLine size="sm" w="w-20" />
-              <SkeletonLine size="title" w="w-32" />
-            </div>
-            <div className="mt-4 flex flex-col gap-3">
-              <div className="grid grid-cols-2 gap-2">
-                <SkeletonLine size="sm" w="w-16" />
-                <SkeletonLine size="sm" w="w-16" className="justify-end" />
-                <SkeletonLine size="sm" w="w-20" />
-                <SkeletonLine size="sm" w="w-20" className="justify-end" />
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <SkeletonText>IDE Pro</SkeletonText>
+              </CardTitle>
+              <CardDescription>
+                <SkeletonMeta className="text-sm leading-5" items={['Csapat csomag', '20 hely', '1 év']} />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-baseline justify-between gap-3 border-t border-border/70 pt-4">
+                <SkeletonText>Egyszeri díj</SkeletonText>
+                <span className="text-2xl font-semibold tracking-tight">
+                  <SkeletonText>900 000 Ft</SkeletonText>
+                </span>
               </div>
-              <div className="flex items-end justify-between border-t pt-3">
-                <SkeletonLine size="sm" w="w-20" />
-                <SkeletonLine size="2xl" w="w-28" className="justify-end" />
-              </div>
-            </div>
-          </SkeletonCard>
+              <p className="mt-2 text-[13px] text-pretty">
+                <SkeletonText>Ez bemutató, fizetned nem kell. A rendelést csak rögzítjük.</SkeletonText>
+              </p>
+            </CardContent>
+          </Card>
         }
       >
-        <SkeletonCard title="w-24" description="w-80">
-          <SkeletonForm submit="w-44">
-            <SkeletonField />
-            <SkeletonField kind="checkbox" described />
-            <SkeletonLine size="sm" w="w-80" />
-          </SkeletonForm>
-        </SkeletonCard>
-      </SkeletonSplit>
+        <Card>
+          <CardContent>
+            <SkeletonForm submit="Vásárlás megerősítése">
+              <SkeletonField label="Cég" />
+              <SkeletonField
+                kind="checkbox"
+                label="Azonnali aktiválás ennél a cégnél"
+                description="Ha kikapcsolod, csak a licenckulcsot kapod meg. Egyszer mutatjuk meg, és később aktiválhatod."
+              />
+            </SkeletonForm>
+          </CardContent>
+        </Card>
+      </SplitLayout>
     </SkeletonPage>
   );
 }

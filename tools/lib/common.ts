@@ -14,7 +14,7 @@ export function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
     console.error(
-      `Hiányzik a(z) ${name} változó. Futtasd a \`pnpm db:seed\` parancsot, vagy add meg környezeti változóként.`,
+      `Hiányzik ez a változó: ${name}. Futtasd a \`pnpm db:seed\` parancsot, vagy add meg környezeti változóként.`,
     );
     process.exit(2);
   }

@@ -1,10 +1,12 @@
-import { BuildingIcon, PackageIcon } from 'lucide-react';
+import { BuildingIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { EmptyState } from '@/components/empty-state';
 import { LinkButton } from '@/components/link-button';
+import { MetaLine } from '@/components/meta-line';
 import { PageHeader } from '@/components/page-header';
+import { SplitLayout } from '@/components/split-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { requireUser } from '@/lib/auth/session';
 import { can } from '@/lib/domain/permissions';
@@ -28,17 +30,36 @@ export default async function PurchasePage({ params }: PageProps<'/dashboard/pur
   return (
     <>
       <PageHeader
-        eyebrow={plan.product.name}
+        trail={[{ href: `/products/${plan.product.slug}`, label: plan.product.name }]}
         title="Vásárlás"
         description="Válaszd ki, melyik cég nevére szóljon a licenc."
-        back={{ href: `/products/${plan.product.slug}`, label: 'Vissza a termékhez' }}
       />
-      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <Card className="order-2 h-fit lg:order-1">
-          <CardHeader>
-            <CardTitle>Rendelés</CardTitle>
-            <CardDescription>A licenckulcsot csak egyszer mutatjuk meg, ezért mentsd el.</CardDescription>
-          </CardHeader>
+      <SplitLayout
+        className="max-xl:[&>aside]:order-first xl:[&>aside]:pt-0"
+        aside={
+          <Card>
+            <CardHeader>
+              <CardTitle>{plan.product.name}</CardTitle>
+              <CardDescription>
+                <MetaLine
+                  className="text-sm leading-5"
+                  items={[`${plan.name} csomag`, formatSeats(plan.seatCount), formatDuration(plan.durationDays)]}
+                />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-baseline justify-between gap-3 border-t border-border/70 pt-4">
+                <span className="text-muted-foreground">Egyszeri díj</span>
+                <span className="nums text-2xl font-semibold tracking-tight">{formatHuf(plan.priceHuf)}</span>
+              </div>
+              <p className="mt-2 text-[13px] text-pretty text-muted-foreground">
+                Ez bemutató, fizetned nem kell. A rendelést csak rögzítjük.
+              </p>
+            </CardContent>
+          </Card>
+        }
+      >
+        <Card>
           <CardContent>
             {companies.length === 0 ? (
               <EmptyState
@@ -49,36 +70,11 @@ export default async function PurchasePage({ params }: PageProps<'/dashboard/pur
                 action={<LinkButton href="/dashboard/companies/new">Cég létrehozása</LinkButton>}
               />
             ) : (
-              <PurchaseForm
-                planId={plan.id}
-                priceLabel={formatHuf(plan.priceHuf)}
-                companies={companies.map(({ id, name }) => ({ id, name }))}
-              />
+              <PurchaseForm planId={plan.id} companies={companies.map(({ id, name }) => ({ id, name }))} />
             )}
           </CardContent>
         </Card>
-        <Card className="order-1 h-fit lg:order-2">
-          <CardHeader>
-            <div className="mb-1 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <PackageIcon className="size-4" />
-            </div>
-            <CardDescription>{plan.product.name}</CardDescription>
-            <CardTitle>{plan.name}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 text-sm">
-            <dl className="grid grid-cols-2 gap-2">
-              <dt className="text-muted-foreground">Helyek</dt>
-              <dd className="nums text-right">{formatSeats(plan.seatCount)}</dd>
-              <dt className="text-muted-foreground">Időtartam</dt>
-              <dd className="text-right">{formatDuration(plan.durationDays)}</dd>
-            </dl>
-            <div className="flex items-baseline justify-between border-t pt-3">
-              <span className="text-muted-foreground">Egyszeri díj</span>
-              <span className="nums text-2xl font-semibold tracking-tight">{formatHuf(plan.priceHuf)}</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </SplitLayout>
     </>
   );
 }

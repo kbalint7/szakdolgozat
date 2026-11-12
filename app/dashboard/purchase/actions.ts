@@ -41,5 +41,5 @@ export async function purchaseAction(
     return failure(error, formData);
   }
   refresh();
-  return success(data.activated ? 'Sikeres vásárlás, a licenc aktiválva.' : 'Sikeres vásárlás.', data);
+  return success(data.activated ? 'Sikeres vásárlás, a licencet aktiváltuk.' : 'Sikeres vásárlás.', data);
 }

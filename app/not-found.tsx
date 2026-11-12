@@ -1,18 +1,16 @@
-import { FileQuestionIcon } from 'lucide-react';
-
-import { EmptyState } from '@/components/empty-state';
 import { LinkButton } from '@/components/link-button';
+import { FocusFrame, Message } from '@/components/message-screen';
 
 export default function NotFound() {
   return (
-    <main className="flex flex-1 items-center justify-center p-4">
-      <EmptyState
-        className="max-w-md border-0 bg-transparent"
-        icon={<FileQuestionIcon />}
+    <FocusFrame>
+      <Message
+        centered
+        eyebrow="404"
         title="Az oldal nem található"
-        description="A keresett oldal nem létezik, vagy nincs hozzá hozzáférésed."
+        description="A keresett oldal nem létezik, vagy nem férsz hozzá."
         action={<LinkButton href="/">Vissza a kezdőlapra</LinkButton>}
       />
-    </main>
+    </FocusFrame>
   );
 }

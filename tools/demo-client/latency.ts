@@ -48,19 +48,21 @@ async function waitUntil(expected: boolean, timeoutMs: number): Promise<number |
 }
 
 async function main() {
-  console.log(`Visszavonási késleltetés mérése: ${rounds} kör, ${hrId}, ${product}`);
+  console.log(`Késés mérése a hely elvesztésétől az elutasításig: ${rounds} kör, ${hrId}, ${product}`);
   const samples: number[] = [];
   for (let round = 1; round <= rounds; round++) {
     if (!(await isAllowed())) {
       await sendEvent('employee.hired', round);
       if ((await waitUntil(true, 10_000)) === null) {
-        throw new Error(`${round}. kör: ${hrId} nem kapott helyet (tele a helykeret, vagy nincs fiókhoz kapcsolva?)`);
+        throw new Error(
+          `${round}. kör: ${hrId} nem kapott helyet (minden hely foglalt, vagy nincs fiókkal összekapcsolva?)`,
+        );
       }
     }
     await sleep(5);
     const accepted = await sendEvent('employee.terminated', round);
     const denied = await waitUntil(false, 30_000);
-    if (denied === null) throw new Error(`${round}. kör: 30 s után sem lett elutasítva`);
+    if (denied === null) throw new Error(`${round}. kör: 30 s után is engedélyezve maradt`);
     const latency = denied - accepted;
     samples.push(latency);
     console.log(`  ${String(round).padStart(2)}. kör: ${latency.toFixed(1)} ms`);

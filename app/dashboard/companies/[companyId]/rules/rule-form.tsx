@@ -1,14 +1,13 @@
 'use client';
 
-import { TriangleAlertIcon } from 'lucide-react';
 import { useActionState, useRef, useState } from 'react';
 
+import { Callout } from '@/components/callout';
 import { SelectField } from '@/components/forms/fields';
 import { FormMessage } from '@/components/forms/form-message';
 import { SubmitButton } from '@/components/forms/submit-button';
 import { TextField } from '@/components/forms/text-field';
 import { useActionFeedback } from '@/components/forms/use-action-feedback';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { FieldGroup } from '@/components/ui/field';
 import { initialActionState } from '@/lib/action-state';
 
@@ -33,14 +32,14 @@ export function RuleForm({
     <form ref={formRef} action={formAction}>
       <FieldGroup>
         {state.status === 'error' && <FormMessage status="error" message={state.message} />}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-5 sm:grid-cols-2">
           <TextField
             name="jobRole"
             label="Munkakör"
             placeholder="pl. developer"
             list="known-job-roles"
             autoComplete="off"
-            description="Úgy, ahogy a HR-rendszer használja. Választhatsz a meglévők közül, vagy beírhatsz újat."
+            description="Úgy írd, ahogy a HR-rendszer küldi."
             defaultValue={state.values?.jobRole}
             errors={state.fieldErrors?.jobRole}
             required
@@ -52,7 +51,7 @@ export function RuleForm({
           </datalist>
           <SelectField
             name="productId"
-            label="Termék"
+            label="Szoftver"
             options={products.map(product => ({ value: product.id, label: product.name }))}
             value={productId}
             onChange={event => setProductId(event.target.value)}
@@ -60,13 +59,9 @@ export function RuleForm({
           />
         </div>
         {selected && !selected.hasCapacity && (
-          <Alert>
-            <TriangleAlertIcon />
-            <AlertDescription>
-              Ehhez a termékhez a cégnek nincs érvényes licence: a szabály létrehozható, de minden jogosult munkavállaló
-              várólistára kerül, amíg licencet nem aktiváltok.
-            </AlertDescription>
-          </Alert>
+          <Callout tone="warning">
+            Ehhez a szoftverhez nincs érvényes licenc. Akinek jár, várólistára kerül, amíg nem aktiválsz egyet.
+          </Callout>
         )}
         <div>
           <SubmitButton>Szabály létrehozása</SubmitButton>

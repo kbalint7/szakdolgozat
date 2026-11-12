@@ -9,10 +9,10 @@ type CheckBody =
 
 const reasons: Record<string, string> = {
   NOT_MEMBER: 'nem vagy tagja egy cégnek sem',
-  NOT_LINKED: 'a fiókod nincs munkavállalóhoz kapcsolva',
-  NOT_ELIGIBLE: 'a munkakörödnek nincs jogosultsága',
+  NOT_LINKED: 'a fiókod nincs összekapcsolva munkavállalóval',
+  NOT_ELIGIBLE: 'a munkakörödhöz nem jár ez a szoftver',
   WAITLISTED: 'várólistán vagy',
-  NO_VALID_LICENSE: 'a céged licence lejárt vagy kevés',
+  NO_VALID_LICENSE: 'a cégednek nincs érvényes licence',
 };
 
 async function check(token: string, product: string): Promise<boolean> {
@@ -33,11 +33,11 @@ async function check(token: string, product: string): Promise<boolean> {
     return false;
   }
   if (body.allowed) {
-    const until = body.license.validUntil ? `, licenc: ${body.license.validUntil.slice(0, 10)}-ig` : '';
+    const until = body.license.validUntil ? `, érvényes eddig: ${body.license.validUntil.slice(0, 10)}` : '';
     console.log(`[${timestamp()}] ENGEDÉLYEZVE ${product}  (${body.company.name}${until}) ${result.ms} ms`);
     return true;
   }
-  const position = body.waitlistPosition ? ` (${body.waitlistPosition}. a sorban)` : '';
+  const position = body.waitlistPosition ? ` (${body.waitlistPosition}. a várólistán)` : '';
   console.log(
     `[${timestamp()}] ELUTASÍTVA  ${product}  ${body.reason}: ${reasons[body.reason] ?? ''}${position} ${result.ms} ms`,
   );

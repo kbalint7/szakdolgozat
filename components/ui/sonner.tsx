@@ -28,7 +28,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          toast: 'cn-toast',
+          toast: 'cn-toast shadow-md!',
+          success: '[&_[data-icon]]:text-success',
+          info: '[&_[data-icon]]:text-info',
+          warning: '[&_[data-icon]]:text-warning',
+          error: 'text-destructive!',
         },
       }}
       {...props}

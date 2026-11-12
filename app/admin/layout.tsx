@@ -1,9 +1,8 @@
 import { AppHeader } from '@/components/shell/app-header';
 import { AppShell } from '@/components/shell/app-shell';
-import { Breadcrumbs } from '@/components/shell/breadcrumbs';
 import { MobileNav } from '@/components/shell/mobile-nav';
 import { NavLinks } from '@/components/shell/nav-links';
-import { Sidebar } from '@/components/shell/sidebar';
+import { Sidebar, SidebarAccount } from '@/components/shell/sidebar';
 
 import { adminNav } from './nav';
 
@@ -18,11 +17,10 @@ export default function AdminLayout({ children }: LayoutProps<'/admin'>) {
       header={
         <AppHeader
           menu={
-            <MobileNav title="Platform admin">
+            <MobileNav title="Adminfelület" account={<SidebarAccount />}>
               <NavLinks sections={adminNav} />
             </MobileNav>
           }
-          breadcrumbs={<Breadcrumbs />}
         />
       }
     >

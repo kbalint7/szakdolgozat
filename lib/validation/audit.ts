@@ -11,7 +11,8 @@ const day = z
 export const auditFilterSchema = z.object({
   category: z.enum(AUDIT_CATEGORIES).optional().catch(undefined),
   hrId: z.string().trim().max(64).optional().catch(undefined),
+  company: z.string().trim().max(100).optional().catch(undefined),
   from: day,
   to: day,
-  before: z.coerce.number().int().positive().optional().catch(undefined),
+  limit: z.coerce.number().int().positive().optional().catch(undefined),
 });

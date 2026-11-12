@@ -9,8 +9,8 @@ export const hrEventStatusLabels: Record<string, string> = {
   processed: 'Feldolgozva',
   stale: 'Elavult',
   failed: 'Sikertelen',
-  duplicate: 'Ismételt',
-  retrying: 'Újrapróbálásra vár',
+  duplicate: 'Többször érkezett',
+  retrying: 'Újra megpróbáljuk',
 };
 
 export const employeeStatusLabels: Record<string, string> = {
@@ -19,17 +19,17 @@ export const employeeStatusLabels: Record<string, string> = {
 };
 
 export const hrEventSourceLabels: Record<string, string> = {
-  api: 'HR API',
+  api: 'HR-rendszer',
   ui: 'Kézi rögzítés',
 };
 
 export const checkReasonLabels: Record<string, string> = {
   NOT_MEMBER: 'nem tagja egy cégnek sem',
-  NOT_LINKED: 'nincs munkavállalóhoz kapcsolva',
-  NOT_ELIGIBLE: 'nem jogosult',
-  WAITLISTED: 'várólistán',
+  NOT_LINKED: 'nincs összekapcsolva munkavállalóval',
+  NOT_ELIGIBLE: 'a munkaköréhez nem jár',
+  WAITLISTED: 'várólistán áll',
   NO_VALID_LICENSE: 'nincs érvényes licenc',
-  PRODUCT_NOT_FOUND: 'ismeretlen termék',
+  PRODUCT_NOT_FOUND: 'ismeretlen szoftver',
 };
 
 export const actorTypeLabels: Record<string, string> = {
@@ -52,12 +52,12 @@ export const auditActionLabels: Record<string, string> = {
   'company.deleted': 'Cég törölve',
   'company.reconciled': 'Helyek újraszámolva',
   'company.ownership_transferred': 'Tulajdonjog átadva',
-  'membership.created': 'Tagság létrejött',
+  'membership.created': 'Új tag a cégben',
   'membership.removed': 'Tag eltávolítva',
   'membership.left': 'Tag kilépett',
   'membership.role_changed': 'Szerepkör módosítva',
-  'membership.linked': 'Tag munkavállalóhoz kapcsolva',
-  'membership.unlinked': 'Tag leválasztva a munkavállalóról',
+  'membership.linked': 'Fiók összekapcsolva a munkavállalóval',
+  'membership.unlinked': 'Fiók leválasztva a munkavállalóról',
   'invitation.created': 'Meghívó létrehozva',
   'invitation.accepted': 'Meghívó elfogadva',
   'invitation.declined': 'Meghívó elutasítva',
@@ -73,18 +73,18 @@ export const auditActionLabels: Record<string, string> = {
   'rule.deleted': 'Szabály törölve',
   'api_key.created': 'API-kulcs létrehozva',
   'api_key.revoked': 'API-kulcs visszavonva',
-  'client_token.created': 'Kliens token létrehozva',
-  'client_token.revoked': 'Kliens token visszavonva',
+  'client_token.created': 'Klienstoken létrehozva',
+  'client_token.revoked': 'Klienstoken visszavonva',
   'employee.hired': 'Munkavállaló belépett',
   'employee.rehired': 'Munkavállaló újra belépett',
   'employee.role_changed': 'Munkakör megváltozott',
   'employee.terminated': 'Munkavállaló kilépett',
-  'hr_event.stale': 'Elavult esemény figyelmen kívül hagyva',
-  'hr_event.retry_requested': 'Esemény újrapróbálása kérve',
+  'hr_event.stale': 'Elavult esemény kihagyva',
+  'hr_event.retry_requested': 'Újrapróbálás indítva',
   'seat.queued': 'Várólistára került',
   'seat.assigned': 'Helyet kapott',
-  'seat.revoked': 'Hely visszavonva',
-  'seat.cancelled': 'Várólistáról törölve',
+  'seat.revoked': 'Elvesztette a helyét',
+  'seat.cancelled': 'Lekerült a várólistáról',
   'seat.requeued': 'Visszakerült a várólistára',
 };
 

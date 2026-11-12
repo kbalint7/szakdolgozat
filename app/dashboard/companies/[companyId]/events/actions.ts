@@ -15,6 +15,14 @@ export async function retryEventAction(companyId: string, id: string): Promise<A
     return failure(error);
   }
   refresh();
-  if (result.outcome === 'failed') return { status: 'error', message: `Ismét sikertelen: ${result.error}` };
-  return success(result.outcome === 'stale' ? 'Feldolgozva: az esemény elavult volt.' : 'Az esemény feldolgozva.');
+  if (result.outcome === 'failed')
+    return {
+      status: 'error',
+      message: 'Most sem sikerült feldolgozni. A hibaüzenetet az esemény technikai részletei között találod.',
+    };
+  return success(
+    result.outcome === 'stale'
+      ? 'Az eseményt feldolgoztuk, de ennél frissebb adatunk van a munkavállalóról, ezért nem változott semmi.'
+      : 'Az eseményt feldolgoztuk.',
+  );
 }

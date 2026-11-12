@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from 'drizzle-orm';
 
 import { db } from '@/db/drizzle';
 import {
@@ -234,7 +234,18 @@ export async function getMySoftware(userId: string, now = new Date()) {
   };
 }
 
-export async function listRecentChecks(companyId: string, limit = 100) {
+function checkConditions(companyId: string, search?: string): SQL[] {
+  const conditions: SQL[] = [eq(licenseChecks.companyId, companyId)];
+  if (search) {
+    const pattern = `%${search.replace(/[\\%_]/g, char => `\\${char}`)}%`;
+    conditions.push(or(ilike(users.name, pattern), ilike(users.email, pattern))!);
+  }
+  return conditions;
+}
+
+export async function listRecentChecks(companyId: string, limit = 100, allowed?: boolean, search?: string) {
+  const conditions = checkConditions(companyId, search);
+  if (allowed !== undefined) conditions.push(eq(licenseChecks.allowed, allowed));
   return db
     .select({
       id: licenseChecks.id,
@@ -249,7 +260,19 @@ export async function listRecentChecks(companyId: string, limit = 100) {
     .from(licenseChecks)
     .leftJoin(products, eq(products.id, licenseChecks.productId))
     .leftJoin(users, eq(users.id, licenseChecks.userId))
-    .where(eq(licenseChecks.companyId, companyId))
+    .where(and(...conditions))
     .orderBy(desc(licenseChecks.id))
     .limit(limit);
+}
+
+export async function countChecksByResult(companyId: string, search?: string) {
+  const [row] = await db
+    .select({
+      allowed: sql<number>`count(*) filter (where ${licenseChecks.allowed})`.mapWith(Number),
+      denied: sql<number>`count(*) filter (where not ${licenseChecks.allowed})`.mapWith(Number),
+    })
+    .from(licenseChecks)
+    .leftJoin(users, eq(users.id, licenseChecks.userId))
+    .where(and(...checkConditions(companyId, search)));
+  return row;
 }

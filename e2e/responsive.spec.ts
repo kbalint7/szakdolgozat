@@ -13,7 +13,10 @@ async function expectNoHorizontalScroll(page: Page, path: string) {
     culprits: [...document.querySelectorAll('body *')]
       .filter(element => {
         const rect = element.getBoundingClientRect();
-        return rect.right > document.documentElement.clientWidth + 1 && !element.closest('[data-slot=table-container]');
+        return (
+          rect.right > document.documentElement.clientWidth + 1 &&
+          !element.closest('[data-slot=table-container], [data-slot=chip-row]')
+        );
       })
       .slice(0, 5)
       .map(element => `${element.tagName.toLowerCase()}.${String(element.className).slice(0, 60)}`),

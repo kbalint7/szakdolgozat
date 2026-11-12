@@ -12,8 +12,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { BusyLabel } from '@/components/forms/busy-label';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import type { ActionState } from '@/lib/action-state';
 
 type ConfirmOptions = {
@@ -37,7 +37,7 @@ export function ActionButton({ action, confirm, children, disabled, ...props }: 
       const result = await action();
       setOpen(false);
       if (!result) return;
-      if (result.status === 'error') toast.error(result.message ?? 'Hiba történt.');
+      if (result.status === 'error') toast.error(result.message ?? 'Váratlan hiba történt. Próbáld újra.');
       else if (result.status === 'success' && result.message) toast.success(result.message);
     });
   }
@@ -46,11 +46,11 @@ export function ActionButton({ action, confirm, children, disabled, ...props }: 
     <Button
       {...props}
       disabled={disabled || pending}
+      focusableWhenDisabled={pending}
       aria-busy={pending || undefined}
       onClick={confirm ? () => setOpen(true) : run}
     >
-      {pending && !confirm && <Spinner />}
-      {children}
+      {confirm ? children : <BusyLabel busy={pending}>{children}</BusyLabel>}
     </Button>
   );
 
@@ -67,9 +67,14 @@ export function ActionButton({ action, confirm, children, disabled, ...props }: 
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={pending}>Mégse</AlertDialogCancel>
-            <Button variant={confirm.destructive ? 'destructive' : 'default'} disabled={pending} onClick={run}>
-              {pending && <Spinner />}
-              {confirm.confirmLabel ?? 'Megerősítés'}
+            <Button
+              variant={confirm.destructive ? 'destructive' : 'default'}
+              disabled={pending}
+              focusableWhenDisabled
+              aria-busy={pending || undefined}
+              onClick={run}
+            >
+              <BusyLabel busy={pending}>{confirm.confirmLabel ?? 'Megerősítés'}</BusyLabel>
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

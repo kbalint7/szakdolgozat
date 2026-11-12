@@ -30,7 +30,7 @@ export async function inviteAction(
     return failure(error, formData);
   }
   refresh();
-  return success('A meghívó elkészült. Küldd el a linket a meghívottnak.', data);
+  return success('A meghívót létrehoztuk. Küldd el a linket a meghívottnak.', data);
 }
 
 export async function regenerateLinkAction(
@@ -46,7 +46,7 @@ export async function regenerateLinkAction(
     return failure(error);
   }
   refresh();
-  return success('Új meghívólink készült; a korábbi link érvénytelen.', data);
+  return success('Új meghívólinket készítettünk. A korábbi már nem működik.', data);
 }
 
 export async function revokeInvitationAction(companyId: string, invitationId: string): Promise<ActionState> {

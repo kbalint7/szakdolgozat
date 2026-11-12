@@ -16,8 +16,11 @@ test.describe('AUTH-1 … AUTH-3', () => {
     await page.getByLabel('E-mail-cím').fill(uniqueEmail('anna'));
     await page.getByLabel('Jelszó').fill('gyenge');
     await page.getByRole('button', { name: 'Regisztráció' }).click();
-    await expect(page.getByText('A jelszónak legalább 8 karakterből kell állnia.')).toBeVisible();
-    await expect(page.getByText('A jelszónak tartalmaznia kell legalább egy nagybetűt.')).toBeVisible();
+    const unmet = page.locator('[data-state="unmet"]');
+    await expect(unmet.filter({ hasText: '8–128 karakter' })).toBeVisible();
+    await expect(unmet.filter({ hasText: 'nagybetű' })).toBeVisible();
+    await expect(unmet.filter({ hasText: 'számjegy' })).toBeVisible();
+    await expect(unmet.filter({ hasText: 'kisbetű' })).toHaveCount(0);
 
     await page.getByLabel('Jelszó').fill(PASSWORD);
     await page.getByRole('button', { name: 'Regisztráció' }).click();

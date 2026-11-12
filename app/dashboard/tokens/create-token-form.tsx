@@ -6,6 +6,7 @@ import { FormMessage } from '@/components/forms/form-message';
 import { SubmitButton } from '@/components/forms/submit-button';
 import { TextField } from '@/components/forms/text-field';
 import { SecretReveal } from '@/components/secret-reveal';
+import { FieldGroup } from '@/components/ui/field';
 import type { ActionState } from '@/lib/action-state';
 
 import { createTokenAction } from './actions';
@@ -16,9 +17,10 @@ export function CreateTokenForm() {
   const [state, formAction] = useActionState(createTokenAction, initialState);
 
   return (
-    <div className="flex flex-col gap-4">
-      <form action={formAction} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="flex-1">
+    <div className="flex flex-col gap-5">
+      <form action={formAction}>
+        <FieldGroup>
+          {state.status === 'error' && !state.fieldErrors && <FormMessage status="error" message={state.message} />}
           <TextField
             name="name"
             label="Név"
@@ -27,17 +29,12 @@ export function CreateTokenForm() {
             errors={state.fieldErrors?.name}
             required
           />
-        </div>
-        <SubmitButton>Token létrehozása</SubmitButton>
+          <div>
+            <SubmitButton>Token létrehozása</SubmitButton>
+          </div>
+        </FieldGroup>
       </form>
-      {state.status === 'error' && !state.fieldErrors && <FormMessage status="error" message={state.message} />}
-      {state.status === 'success' && state.data && (
-        <SecretReveal
-          label="Új kliens token"
-          value={state.data.token}
-          note="Add meg a szoftver beállításaiban. Később nem tudjuk újra megmutatni."
-        />
-      )}
+      {state.status === 'success' && state.data && <SecretReveal label="Új klienstoken" value={state.data.token} />}
     </div>
   );
 }

@@ -20,7 +20,7 @@ export async function updateProfileAction(_prev: ActionState, formData: FormData
     return failure(error, formData);
   }
   refresh();
-  return success('A profil elmentve.');
+  return success('A profilodat elmentettük.');
 }
 
 export async function deleteAccountAction(): Promise<ActionState> {

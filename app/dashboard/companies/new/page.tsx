@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
-import { Callout } from '@/components/callout';
 import { PageHeader } from '@/components/page-header';
+import { Narrow } from '@/components/split-layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { requireUser } from '@/lib/auth/session';
 
@@ -15,21 +15,16 @@ export default async function NewCompanyPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Cégeim"
         title="Új cég"
-        description="A cég létrehozója lesz a tulajdonos. Később meghívhatsz adminisztrátorokat és tagokat."
+        description="Te leszel a tulajdonos. Adminisztrátorokat és tagokat a létrehozás után hívhatsz meg."
       />
-      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
+      <Narrow>
         <Card>
           <CardContent>
             <CompanyForm action={createCompanyAction} submitLabel="Létrehozás" />
           </CardContent>
         </Card>
-        <Callout tone="note" title="Ki használhatja a szoftvereket?" className="h-fit">
-          A tulajdonosi és az adminisztrátori szerepkör a cég kezeléséhez ad jogot. Szoftvert az használhat, aki a cég
-          munkavállalója, és a munkaköréhez hozzá van rendelve a szoftver.
-        </Callout>
-      </div>
+      </Narrow>
     </>
   );
 }

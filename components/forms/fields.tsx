@@ -7,6 +7,8 @@ import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 
+import { Optional } from './text-field';
+
 function Errors({ errors }: { errors?: string[] }) {
   if (!errors?.length) return null;
   return <FieldError errors={errors.map(message => ({ message }))} />;
@@ -16,18 +18,22 @@ type TextareaFieldProps = Omit<React.ComponentProps<typeof Textarea>, 'name'> & 
   name: string;
   label: string;
   description?: React.ReactNode;
+  optional?: boolean;
   errors?: string[];
 };
 
-export function TextareaField({ name, label, description, errors, id, ...props }: TextareaFieldProps) {
+export function TextareaField({ name, label, description, optional, errors, id, ...props }: TextareaFieldProps) {
   const generatedId = useId();
   const inputId = id ?? `${name}-${generatedId}`;
   const invalid = Boolean(errors?.length);
   return (
     <Field data-invalid={invalid || undefined}>
-      <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
+      <FieldLabel htmlFor={inputId}>
+        {label}
+        {optional && <Optional />}
+      </FieldLabel>
       <Textarea id={inputId} name={name} aria-invalid={invalid || undefined} {...props} />
-      {description && <FieldDescription>{description}</FieldDescription>}
+      {description && !invalid && <FieldDescription>{description}</FieldDescription>}
       <Errors errors={errors} />
     </Field>
   );
@@ -66,7 +72,7 @@ export function SelectField({
           </NativeSelectOption>
         ))}
       </NativeSelect>
-      {description && <FieldDescription>{description}</FieldDescription>}
+      {description && !invalid && <FieldDescription>{description}</FieldDescription>}
       <Errors errors={errors} />
     </Field>
   );
@@ -87,7 +93,7 @@ export function CheckboxField({ name, label, description, defaultChecked, errors
       <Checkbox id={inputId} name={name} defaultChecked={defaultChecked} />
       <FieldContent>
         <FieldLabel htmlFor={inputId}>{label}</FieldLabel>
-        {description && <FieldDescription>{description}</FieldDescription>}
+        {description && !errors?.length && <FieldDescription>{description}</FieldDescription>}
         <Errors errors={errors} />
       </FieldContent>
     </Field>

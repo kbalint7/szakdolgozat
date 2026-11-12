@@ -7,7 +7,7 @@ import { PageHeader } from '@/components/page-header';
 import { loadAuditPage } from '@/lib/audit-page';
 import { getCompanyContext } from '@/lib/auth/company';
 
-export const metadata: Metadata = { title: 'Audit napló' };
+export const metadata: Metadata = { title: 'Auditnapló' };
 
 export default async function CompanyAuditPage({
   params,
@@ -17,22 +17,32 @@ export default async function CompanyAuditPage({
   const ctx = await getCompanyContext(companyId);
   if (!ctx.can('audit.view')) return <AccessDenied />;
 
-  const base = `/dashboard/companies/${companyId}/audit`;
-  const { filter, entries, olderHref } = await loadAuditPage(companyId, await searchParams, base);
+  const company = `/dashboard/companies/${companyId}`;
+  const base = `${company}/audit`;
+  const { filter, filtered, entries, more } = await loadAuditPage(companyId, await searchParams, base);
 
   return (
     <>
       <PageHeader
-        eyebrow={ctx.company.name}
-        title="Audit napló"
-        description="Minden változás: ki hajtotta végre, és mi váltotta ki. A bejegyzések utólag nem módosíthatók."
+        trail={[{ href: company, label: ctx.company.name }]}
+        trailMobileOnly
+        title="Auditnapló"
+        description="Ki mit változtatott és miért. A bejegyzéseket utólag senki sem módosíthatja."
       />
-      <AuditFilters values={filter} resetHref={base} />
-      <AuditTable
-        entries={entries}
-        employeeHref={employeeId => `/dashboard/companies/${companyId}/employees/${employeeId}`}
-        olderHref={olderHref}
-      />
+      <div className="flex flex-col gap-4">
+        <AuditFilters values={filter} resetHref={base} />
+        <AuditTable
+          entries={entries}
+          filtered={filtered}
+          employeeHref={employeeId => `${company}/employees/${employeeId}`}
+          eventHref={
+            ctx.can('hrEvents.view')
+              ? event => `${company}/events?${new URLSearchParams({ q: event.hrId, event: event.id })}`
+              : undefined
+          }
+          more={more}
+        />
+      </div>
     </>
   );
 }

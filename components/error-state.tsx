@@ -1,9 +1,8 @@
 'use client';
 
-import { TriangleAlertIcon } from 'lucide-react';
 import { useEffect } from 'react';
 
-import { EmptyState } from '@/components/empty-state';
+import { Message } from '@/components/message-screen';
 import { Button } from '@/components/ui/button';
 
 export function ErrorState({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
@@ -12,15 +11,10 @@ export function ErrorState({ error, retry }: { error: Error & { digest?: string 
   }, [error]);
 
   return (
-    <EmptyState
-      icon={<TriangleAlertIcon />}
+    <Message
+      eyebrow={error.digest ? <>Hibakód: {error.digest}</> : undefined}
       title="Hiba történt"
-      description={
-        <>
-          Az oldal betöltése nem sikerült. Próbáld újra, és ha a hiba megmarad, jelezd az üzemeltetőnek.
-          {error.digest && <span className="mt-2 block font-mono text-xs">Hibakód: {error.digest}</span>}
-        </>
-      }
+      description="Az oldalt nem sikerült betölteni. Próbáld újra, és ha akkor sem megy, szólj az üzemeltetőnek."
       action={<Button onClick={() => retry()}>Újrapróbálás</Button>}
     />
   );

@@ -39,13 +39,16 @@ async function openSeats(companyId: string, employeeIds?: string[]) {
     .orderBy(asc(products.name));
 }
 
-export type EmployeeFilter = { search?: string; status?: 'active' | 'terminated' };
+export type EmployeeFilter = {
+  search?: string;
+  status?: 'active' | 'terminated';
+  limit?: number;
+};
 
-export async function listEmployees(companyId: string, filter: EmployeeFilter = {}) {
+function searchConditions(companyId: string, search?: string): SQL[] {
   const conditions: SQL[] = [eq(employees.companyId, companyId)];
-  if (filter.status) conditions.push(eq(employees.status, filter.status));
-  if (filter.search) {
-    const pattern = `%${filter.search.replace(/[\\%_]/g, char => `\\${char}`)}%`;
+  if (search) {
+    const pattern = `%${search.replace(/[\\%_]/g, char => `\\${char}`)}%`;
     conditions.push(
       or(
         ilike(employees.hrId, pattern),
@@ -55,26 +58,41 @@ export async function listEmployees(companyId: string, filter: EmployeeFilter = 
       )!,
     );
   }
+  return conditions;
+}
 
-  const [rows, seats] = await Promise.all([
-    db
-      .select({
-        id: employees.id,
-        hrId: employees.hrId,
-        name: employees.name,
-        email: employees.email,
-        jobRole: employees.jobRole,
-        status: employees.status,
-        stateAsOf: employees.stateAsOf,
-        linkedUser: { id: users.id, name: users.name, email: users.email },
-      })
-      .from(employees)
-      .leftJoin(memberships, eq(memberships.id, employees.membershipId))
-      .leftJoin(users, eq(users.id, memberships.userId))
-      .where(and(...conditions))
-      .orderBy(sql`${employees.hrId} collate "C"`),
-    openSeats(companyId),
-  ]);
+export async function countEmployeesByStatus(companyId: string, search?: string) {
+  const [row] = await db
+    .select({
+      active: sql<number>`count(*) filter (where ${employees.status} = 'active')`.mapWith(Number),
+      terminated: sql<number>`count(*) filter (where ${employees.status} = 'terminated')`.mapWith(Number),
+    })
+    .from(employees)
+    .where(and(...searchConditions(companyId, search)));
+  return row;
+}
+
+export async function listEmployees(companyId: string, filter: EmployeeFilter = {}) {
+  const conditions = searchConditions(companyId, filter.search);
+  if (filter.status) conditions.push(eq(employees.status, filter.status));
+
+  const query = db
+    .select({
+      id: employees.id,
+      hrId: employees.hrId,
+      name: employees.name,
+      email: employees.email,
+      jobRole: employees.jobRole,
+      status: employees.status,
+      stateAsOf: employees.stateAsOf,
+      linkedUser: { id: users.id, name: users.name, email: users.email },
+    })
+    .from(employees)
+    .leftJoin(memberships, eq(memberships.id, employees.membershipId))
+    .leftJoin(users, eq(users.id, memberships.userId))
+    .where(and(...conditions))
+    .orderBy(sql`${employees.hrId} collate "C"`);
+  const [rows, seats] = await Promise.all([filter.limit ? query.limit(filter.limit) : query, openSeats(companyId)]);
 
   const seatsByEmployee = new Map<string, EmployeeSeat[]>();
   for (const seat of seats) {
@@ -125,6 +143,7 @@ export type TimelineItem =
       source: string;
       attempts: number;
       lastError: string | null;
+      nextAttemptAt: Date | null;
     }
   | {
       kind: 'decision';
@@ -177,6 +196,7 @@ export async function getEmployeeTimeline(companyId: string, employee: { id: str
       source: event.source,
       attempts: event.attempts,
       lastError: event.lastError,
+      nextAttemptAt: event.nextAttemptAt,
     })),
     ...decisions.map((entry): TimelineItem => ({
       kind: 'decision',

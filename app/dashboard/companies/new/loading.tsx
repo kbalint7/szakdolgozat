@@ -1,24 +1,24 @@
-import {
-  SkeletonCard,
-  SkeletonField,
-  SkeletonForm,
-  SkeletonPage,
-  SkeletonPageHeader,
-  SkeletonSplit,
-} from '@/components/page-skeleton';
+import { SkeletonField, SkeletonForm, SkeletonPage, SkeletonPageHeader } from '@/components/page-skeleton';
+import { Narrow } from '@/components/split-layout';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function Loading() {
   return (
     <SkeletonPage>
-      <SkeletonPageHeader title="w-24" />
-      <SkeletonSplit asideLines={5}>
-        <SkeletonCard title={false} description={false}>
-          <SkeletonForm className="max-w-xl">
-            <SkeletonField />
-            <SkeletonField kind="textarea" />
-          </SkeletonForm>
-        </SkeletonCard>
-      </SkeletonSplit>
+      <SkeletonPageHeader
+        title="Új cég"
+        description="Te leszel a tulajdonos. Adminisztrátorokat és tagokat a létrehozás után hívhatsz meg."
+      />
+      <Narrow>
+        <Card>
+          <CardContent>
+            <SkeletonForm submit="Létrehozás">
+              <SkeletonField label="Cégnév" description="A meghívókban is ez a név jelenik meg." />
+              <SkeletonField label="Leírás (nem kötelező)" kind="textarea" />
+            </SkeletonForm>
+          </CardContent>
+        </Card>
+      </Narrow>
     </SkeletonPage>
   );
 }

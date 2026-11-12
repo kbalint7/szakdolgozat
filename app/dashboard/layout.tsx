@@ -2,9 +2,9 @@ import { cache, Suspense } from 'react';
 
 import { AppHeader } from '@/components/shell/app-header';
 import { AppShell } from '@/components/shell/app-shell';
-import { Breadcrumbs } from '@/components/shell/breadcrumbs';
 import { MobileNav } from '@/components/shell/mobile-nav';
-import { Sidebar } from '@/components/shell/sidebar';
+import { Sidebar, SidebarAccount } from '@/components/shell/sidebar';
+import { ViewerRoleProvider } from '@/components/shell/viewer-role';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSession } from '@/lib/auth/session';
 import { listMyCompanies } from '@/lib/services/companies';
@@ -27,12 +27,6 @@ async function DashboardNavLoader() {
   return <DashboardNav companies={data.companies} isPlatformAdmin={data.isPlatformAdmin} />;
 }
 
-async function BreadcrumbsLoader() {
-  const data = await getNavData();
-  const names = Object.fromEntries((data?.companies ?? []).map(company => [company.id, company.name]));
-  return <Breadcrumbs companyNames={names} />;
-}
-
 function NavSkeleton() {
   return (
     <div className="flex flex-col gap-2 px-1" aria-busy="true">
@@ -50,20 +44,13 @@ export default function DashboardLayout({ children }: LayoutProps<'/dashboard'>)
     </Suspense>
   );
   return (
-    <AppShell
-      sidebar={<Sidebar>{nav}</Sidebar>}
-      header={
-        <AppHeader
-          menu={<MobileNav>{nav}</MobileNav>}
-          breadcrumbs={
-            <Suspense fallback={null}>
-              <BreadcrumbsLoader />
-            </Suspense>
-          }
-        />
-      }
-    >
-      {children}
-    </AppShell>
+    <ViewerRoleProvider>
+      <AppShell
+        sidebar={<Sidebar>{nav}</Sidebar>}
+        header={<AppHeader menu={<MobileNav account={<SidebarAccount />}>{nav}</MobileNav>} />}
+      >
+        {children}
+      </AppShell>
+    </ViewerRoleProvider>
   );
 }
