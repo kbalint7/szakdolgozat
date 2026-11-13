@@ -114,3 +114,34 @@ pnpm test:e2e           # Playwright: buildeli és a 3100-as porton elindítja a
 Az integrációs és az end-to-end tesztekhez fut a `db` konténer, és a `.env`-ben szerepel a `TEST_DATABASE_URL`. A
 `licenckezelo_test` adatbázist a konténer az első indításkor létrehozza; ha az adatbázis-kötet ennél régebbi, előbb
 `docker compose down -v`. Az end-to-end tesztekhez egyszer kell a böngésző is: `pnpm exec playwright install chromium`.
+
+## Projektszerkezet
+
+```
+app/                 Next.js útvonalak: (public) katalógus, (auth) bejelentkezés és meghívók, dashboard, admin, /api/v1
+components/          felületi komponensek (shadcn/ui: components/ui)
+db/                  séma, adatbázis-kapcsolat, migráció, kezdeti adatok (seed)
+drizzle/             SQL-migrációk
+lib/domain/          tiszta üzleti szabályok: kiosztás, keret, sorrend, jogosultság, ellenőrzés, HR-események
+lib/services/        tranzakciós szolgáltatások: keretek, HR-események, rendelések, szabályok, cégek, audit
+lib/auth/, lib/api/  munkamenetek és céges jogosultság; API-kulcsok, klienstokenek, hibaformátum
+worker/              háttérfolyamat
+tools/               HR-szimulátor, demó kliens, késleltetés- és terhelésmérés
+tests/unit, tests/integration, e2e/
+docs/                specifikáció, telepítés, döntési rekordok, megfeleltetés, tesztjegyzőkönyv, MI-napló
+```
+
+## Dokumentáció
+
+- [`docs/SPEC.md`](docs/SPEC.md): követelmények, üzleti szabályok, interfészek, használati esetek
+- [`docs/install.md`](docs/install.md): telepítési és üzemeltetési útmutató, hibaelhárítás, mentés
+- [`docs/adr/`](docs/adr): architekturális döntési rekordok
+- [`docs/traceability.md`](docs/traceability.md): követelmény → megvalósítás → teszt
+- [`docs/test-report.md`](docs/test-report.md): tesztfuttatás, forgatókönyvek, mérések, nyitott hibák
+- [`docs/ai-log.md`](docs/ai-log.md): a mesterséges intelligenciával végzett munka naplója
+
+## Állapot
+
+A specifikáció kötelező és ajánlott követelményei megvalósultak; a nem megvalósított opcionális részeket és
+a nyitott hibákat a [tesztjegyzőkönyv](docs/test-report.md#nyitott-hibák-és-korlátok) sorolja fel. Az utolsó
+futtatáson (2026. november 13.) mind a 77 egységteszt, 41 integrációs teszt és 8 E2E teszt sikeres volt.
