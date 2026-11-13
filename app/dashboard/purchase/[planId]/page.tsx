@@ -48,9 +48,11 @@ export default async function PurchasePage({ params }: PageProps<'/dashboard/pur
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-baseline justify-between gap-3 border-t border-border/70 pt-4">
-                <span className="text-muted-foreground">Egyszeri díj</span>
-                <span className="nums text-2xl font-semibold tracking-tight">{formatHuf(plan.priceHuf)}</span>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-t border-border/70 pt-4">
+                <span className="whitespace-nowrap text-muted-foreground">Egyszeri díj</span>
+                <span className="nums text-2xl font-semibold tracking-tight whitespace-nowrap">
+                  {formatHuf(plan.priceHuf)}
+                </span>
               </div>
               <p className="mt-2 text-[13px] text-pretty text-muted-foreground">
                 Ez bemutató, fizetned nem kell. A rendelést csak rögzítjük.

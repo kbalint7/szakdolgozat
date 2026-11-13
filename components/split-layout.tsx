@@ -14,7 +14,9 @@ export function SplitLayout({
   className?: string;
 }) {
   return (
-    <div className={cn('grid items-start gap-x-10 gap-y-6 xl:grid-cols-[minmax(0,46rem)_minmax(0,1fr)]', className)}>
+    <div
+      className={cn('grid items-start gap-x-10 gap-y-6 xl:grid-cols-[minmax(0,46rem)_minmax(16rem,1fr)]', className)}
+    >
       <Narrow>{children}</Narrow>
       {aside && <aside className="max-w-[46rem] xl:pt-1">{aside}</aside>}
     </div>

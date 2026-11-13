@@ -30,9 +30,11 @@ export default function Loading() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-baseline justify-between gap-3 border-t border-border/70 pt-4">
-                <SkeletonText>Egyszeri díj</SkeletonText>
-                <span className="text-2xl font-semibold tracking-tight">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-t border-border/70 pt-4">
+                <span className="whitespace-nowrap">
+                  <SkeletonText>Egyszeri díj</SkeletonText>
+                </span>
+                <span className="text-2xl font-semibold tracking-tight whitespace-nowrap">
                   <SkeletonText>900 000 Ft</SkeletonText>
                 </span>
               </div>
