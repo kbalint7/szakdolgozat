@@ -1,0 +1,11 @@
+{
+  "clients": 20,
+  "durationS": 15,
+  "requests": 5056,
+  "errors": 0,
+  "throughputRps": 336.6,
+  "p50Ms": 53,
+  "p95Ms": 102,
+  "maxMs": 181,
+  "measuredAt": "2026-11-13T14:55:21.533Z"
+}
